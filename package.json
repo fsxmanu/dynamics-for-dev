@@ -1,7 +1,7 @@
 {
   "name": "dynamics-for-dev",
   "displayName": "Dynamics-For-Dev",
-  "description": "",
+  "description": "An extension that supports you while developing for Dynamics 365",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.61.0"
@@ -10,7 +10,8 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:dynamics-for-dev.uploadWebResource"
+    "onCommand:dynamics-for-dev.uploadWebResource",
+    "onCommand:dynamics-for-dev.addDynamicsConfig"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -18,8 +19,20 @@
       {
         "command": "dynamics-for-dev.uploadWebResource",
         "title": "Hello World"
+      },
+      {
+        "command": "dynamics-for-dev.addDynamicsConfig",
+        "title": "Add new dynamicsConfig"
       }
-    ]
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "dynamics-for-dev.addDynamicsConfig",
+          "group": "1_modification"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
@@ -33,7 +46,6 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@azure/identity-vscode": "^1.0.0",
     "@types/glob": "^7.1.4",
     "@types/mocha": "^9.0.0",
     "@types/node": "14.x",
@@ -49,7 +61,18 @@
     "webpack": "^5.52.1",
     "webpack-cli": "^4.8.0"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fsxmanu/dynamics-for-dev"
+  },
+  "bugs": {
+    "url": "https://github.com/fsxmanu/dynamics-for-dev/issues",
+    "email": "clarity.hurler-0n@icloud.com"
+  },
   "dependencies": {
     "@azure/identity": "^2.0.1"
-  }
+  },
+  "extensionDependencies": [
+    "ms-vscode.azure-account"
+  ]
 }
