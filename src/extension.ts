@@ -2,10 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { WebResourceProcessor } from './webresource/webresource-processor';
-import { useIdentityPlugin, DefaultAzureCredential } from "@azure/identity";
-import { vsCodePlugin } from "@azure/identity-vscode";
-
-useIdentityPlugin(vsCodePlugin);
+import { createTemplateFile } from './mapping/mapping-file-provider';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -22,10 +19,14 @@ export function activate(context: vscode.ExtensionContext) {
 	let uploadCommand = vscode.commands.registerCommand('dynamics-for-dev.uploadWebResource', () => new WebResourceProcessor(basePath).uploadWebResource());
 	context.subscriptions.push(uploadCommand);
 
-	let addJsonTemplateCommand = vscode.commands.registerCommand('powerwebresource-manager.AddUploadJsonTemplate', () => {
-		
+	let addJsonTemplateCommand = vscode.commands.registerCommand('dynamics-for-dev.addDynamicsConfig', () => {
+		createTemplateFile();
 	});
+	context.subscriptions.push(addJsonTemplateCommand);
 
+	let uploadContectCommand = vscode.commands.registerCommand('dynamics-for-dev.uploadWebResourceContext', () => {
+		createTemplateFile();
+	});
 	context.subscriptions.push(addJsonTemplateCommand);
 }
 
