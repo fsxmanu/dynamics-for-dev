@@ -1,70 +1,83 @@
-# dynamics-for-dev README
+# PowerWebResource-Manager
 
-This is the README for your extension "dynamics-for-dev". After writing up a brief description, we recommend including the following sections.
+Dynamics-For-Dev makes developing for Dynamics easier without leaving your coding environment.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
-
-For example if there is an image subfolder under your extension project workspace:
-
-\!\[feature X\]\(images/feature-x.png\)
-
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+* Add new webresources to CRM
+* Update existing web resources in CRM
+* All webresource types are supported
+* Use the Azure Authentication to connect to Dynamics Cusetomer Engagement (CRM)
 
 ## Requirements
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+To connect to dynamics you need to sign in to azure with the Azure Account (identifier: ms-vscode.azure-account) extension. It should have been installed with this extension.
+To check just search for `Azure: Sign In` in your Command Palette and sign in.
 
-## Extension Settings
+## Use it
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+First you need to create a dynamicsConfig.json file. For this you just right click in your Visual Studio workspace explorer and select the new menu point "Add new dynamicsConfig.json".
 
-For example:
+Then you need to configure the json so you can upload the webresource. The target is that you only need to do this once.
 
-This extension contributes the following settings:
+After that:
 
-* `myExtension.enable`: enable/disable this extension
-* `myExtension.thing`: set to `blah` to do something
+You can call the upload command via the command palette in vs code. Search for "Dynamics-For-Dev: Upload WebResource" and follow the instructions.
+Alternatively you can right click a supported file (See [Supported Files](#supported-files)) and use the "Upload to Dynamics" command in the context menu.
+
+**NamingConvention** 
+
+`WebResourceFolder`: The folder(s) in which your webresources are located. Use paths from the source workspace folder. No need to add the last "/". <br/>
+`Prefix`: The prefix that will be added to your webresource when you upload it. You can use more than one but you need to select the correct one each time. <br/>
+
+**OrgInfo**
+
+`CrmUrl`: your environments url. Don't use the "/" at the end. <br/>
+`ApiVersion`: The api version in your dynamics. This is 9.1 by default. <br/>
+
+*Sample*
+
+```
+{
+    "NamingConvention" : {
+        "WebResourceFolder" : [ "/JsFoler1/path", "/Jsfolder2/path" ],
+        "Prefix" : [ "new_/CustomJsFolder/", "new_" ]
+    },
+    "OrgInfo" : {
+        "CrmUrl" : "https://yourorganization.yourregion.dynamics.com",
+        "ApiVersion" : "9.1"
+    },
+    "UploadOptions" : {
+        "AddExistingToSolution" : false
+    }
+}
+```
+
+**UploadOptions**
+
+`AddExistingToSolution`: if you set this to true, it will ask you if you want to add the webresource to a solution even if it already exists. Otherwise it will just ask you if you create a new one. <br/>
+
+## Supported files
+
+* Webpage (.html)
+* Style Sheet (.css)
+* Script (.js)
+* Data (.xml)
+* PNG format (.png)
+* JPG format (jpg, .jpeg)
+* GIF format (.gif)
+* Silverlight (.xap)
+* Style Sheet (.xsl)
+* ICO format (.ico)
+* Vector format (.svg)
+* String (.resx)
 
 ## Known Issues
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+Errorhandling isn't aways giving feedback to the user. Will be corrected.
 
 ## Release Notes
 
-Users appreciate release notes as you update your extension.
+### 0.5.0
 
-### 1.0.0
-
-Initial release of ...
-
-### 1.0.1
-
-Fixed issue #.
-
-### 1.1.0
-
-Added features X, Y, and Z.
-
------------------------------------------------------------------------------------------------------------
-## Following extension guidelines
-
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
-
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
-
-## Working with Markdown
-
-**Note:** You can author your README using Visual Studio Code.  Here are some useful editor keyboard shortcuts:
-
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux)
-* Toggle preview (`Shift+CMD+V` on macOS or `Shift+Ctrl+V` on Windows and Linux)
-* Press `Ctrl+Space` (Windows, Linux) or `Cmd+Space` (macOS) to see a list of Markdown snippets
-
-### For more information
-
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
-
-**Enjoy!**
+Initial release. Uplaoding WebResource to Dynamics now possible
