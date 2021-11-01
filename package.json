@@ -18,7 +18,7 @@
     "commands": [
       {
         "command": "dynamics-for-dev.uploadWebResource",
-        "title": "Hello World"
+        "title": "Dynamics-For-Dev: Upload WebResource"
       },
       {
         "command": "dynamics-for-dev.addDynamicsConfig",
@@ -70,7 +70,8 @@
     "email": "clarity.hurler-0n@icloud.com"
   },
   "dependencies": {
-    "@azure/identity": "^2.0.1"
+    "@azure/identity": "^2.0.1",
+    "xhr2": "^0.2.1"
   },
   "extensionDependencies": [
     "ms-vscode.azure-account"
