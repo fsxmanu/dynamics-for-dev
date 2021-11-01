@@ -10,6 +10,7 @@
   "categories": [
     "Other"
   ],
+  "icon": "DynamicsForDev-Logo.PNG",
   "activationEvents": [
     "onCommand:dynamics-for-dev.uploadWebResource",
     "onCommand:dynamics-for-dev.addDynamicsConfig",
