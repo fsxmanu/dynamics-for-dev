@@ -3,31 +3,31 @@ import { DefaultAzureCredential, AccessToken, AzureCliCredentialOptions } from "
 import { Helpers } from "../helpers";
 import * as fs from 'fs';
 
-
-let _prefix: string;
-let _webResourceFolder: string;
 let _tokenResult: AccessToken;
-let _data: any = null;
-let _selectedFile: string;
 
 export class WebResourceProcessor {
-    rootPath: string;
-    connection: DefaultAzureCredential;
-    configFileLocation: string;
+    _prefix: string = "";
+    _webResourceFolder: string = "";
+    _data: any = null;
+    _selectedFile: string = "";
+    _rootPath: string;
+    _connection: DefaultAzureCredential;
+    _configFileLocation: string;
+
     constructor(workSpaceRootPath: string) {
-        this.rootPath = workSpaceRootPath;
-        this.connection = new DefaultAzureCredential();
-        this.configFileLocation = this.rootPath + '/dynamicsConfig.json';
+        this._rootPath = workSpaceRootPath;
+        this._connection = new DefaultAzureCredential();
+        this._configFileLocation = this._rootPath + '/dynamicsConfig.json';
     }
 
     setUpRequiredVariables() {
         return new Promise<void>((resolve, reject) => {
             this.getConfigData();
-            if(_data === null) { return; }
+            if(this._data === null) { return; }
             this.getWebResourceFolder().then((webResourceFolder) => {
-                _webResourceFolder = webResourceFolder;
+                this._webResourceFolder = webResourceFolder;
                 this.determinePrefix().then((prefix) => {
-                    _prefix = prefix;
+                    this._prefix = prefix;
                     resolve();
                 });
             });
@@ -35,27 +35,17 @@ export class WebResourceProcessor {
     }
 
     getConfigData() {
-        if(fs.existsSync(this.configFileLocation)){
-            _data = JSON.parse(fs.readFileSync(this.configFileLocation, "utf-8"));
+        if(fs.existsSync(this._configFileLocation)){
+            this._data = JSON.parse(fs.readFileSync(this._configFileLocation, "utf-8"));
         }
         else {
-            vscode.window.showErrorMessage(`No dynamicsConfig.json file was found. Please add one in ${this.rootPath}`);
+            vscode.window.showErrorMessage(`No dynamicsConfig.json file was found. Please add one in ${this._rootPath}`);
         }
-        // return new Promise<void>((resolve, reject) => {
-        //     if(fs.existsSync(this.configFileLocation)){
-        //         _data = JSON.parse(fs.readFileSync(this.configFileLocation, "utf-8"));
-        //         resolve();
-        //     }
-        //     else {
-        //         vscode.window.showErrorMessage(`No dynamicsConfig.json file was found. Please add one in ${this.rootPath}`);
-        //         reject();
-        //     }
-        // });
     }
 
     async uploadWebResourceContext(){
         await this.getConfigData();
-        if(_data === null) { return; }
+        if(this._data === null) { return; }
         
     }
 
@@ -74,7 +64,7 @@ export class WebResourceProcessor {
 
     getWebResourceFolder() : Promise<string> {
         return new Promise<string>((resolve, reject) => {
-            let folderOptions = _data.NamingConvention.WebResourceFolder;
+            let folderOptions = this._data.NamingConvention.WebResourceFolder;
             if (folderOptions.length > 1){
                 this.getWebResourceLocation(folderOptions).then(folder => { resolve(folder); });
             } else {
@@ -97,20 +87,20 @@ export class WebResourceProcessor {
     determinePrefix() : Promise<string> {
         return new Promise<string>((resolve, reject) =>
         {
-            let prefixOptions = _data.NamingConvention.Prefix;
+            let prefixOptions = this._data.NamingConvention.Prefix;
             if(prefixOptions.length > 1){
                 this.getPrefix().then((prefix) => {
                 resolve(prefix);
                 });
             }else {
-                return new Promise((resolve) =>  resolve(_data.NamingConvention.Prefix));
+                return new Promise((resolve) =>  resolve(this._data.NamingConvention.Prefix));
             }
         });
     }
 
     getPrefix(): Promise<string> {
         return new Promise<string>((resolve, reject) => {
-            let prefixOptions = _data.NamingConvention.Prefix;
+            let prefixOptions = this._data.NamingConvention.Prefix;
         
             let options = [];
             for(let i = 0; i < prefixOptions.length; i++) {
@@ -126,11 +116,11 @@ export class WebResourceProcessor {
 
     readWebResources() : Promise<void>{ 
         return new Promise((resolve, reject) => {
-            let webResources = fs.readdirSync(this.rootPath + _webResourceFolder);
+            let webResources = fs.readdirSync(this._rootPath + this._webResourceFolder);
             vscode.window.showQuickPick(webResources).then(selectedFile => {
                 if(!selectedFile){ return; }
                 try {
-                    _selectedFile = selectedFile;
+                    this._selectedFile = selectedFile;
                     resolve();
                 } catch (err){
                     vscode.window.showErrorMessage(`There was an error uploading your webresource, Reason: ${err}`);
@@ -162,7 +152,7 @@ export class WebResourceProcessor {
 
     uploadFile(isNew: boolean, existingFile?: any) {
 		let fileContent: string;
-		fileContent = fs.readFileSync(`${this.rootPath}${_webResourceFolder}/${_selectedFile}`, {encoding: 'base64'});
+		fileContent = fs.readFileSync(`${this._rootPath}${this._webResourceFolder}/${this._selectedFile}`, {encoding: 'base64'});
 		if(isNew){
 			this.chooseWebResourceType().then(webResourceType => {
                 this.uploadNewWebResource(webResourceType, fileContent).then((match) => {
@@ -176,7 +166,7 @@ export class WebResourceProcessor {
 		}
 		else {
 			this.updateExistingWebResource(existingFile, fileContent).then(() => {
-                if(_data.UploadOptions.AddExistingToSolution === true){
+                if(this._data.UploadOptions.AddExistingToSolution === true){
                     this.askToAddToSolution(existingFile);
                 }
                 this.publishWebResource(existingFile.webresourceid);
@@ -216,8 +206,8 @@ export class WebResourceProcessor {
             return new Promise<string>((resolve, reject) => {
                 let xmlHttpRequest = require('xhr2');
                 var req = new xmlHttpRequest();
-                let entity = Helpers.createEntity(fileContent, _selectedFile, webResourceType, _prefix);
-                req.open("POST", `${_data.OrgInfo.CrmUrl}/api/data/v${_data.OrgInfo.ApiVersion}/webresourceset`);
+                let entity = Helpers.createEntity(fileContent, this._selectedFile, webResourceType, this._prefix);
+                req.open("POST", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/webresourceset`);
                 req = this.setRequestHeaders(req, "application/json; charset=utf-8").then(response => {
                     req = response;
                     req.addEventListener("load", function() {
@@ -246,7 +236,7 @@ export class WebResourceProcessor {
             try {
                 let xmlHttpRequest = require('xhr2');
                 var req = new xmlHttpRequest();
-                req.open("PATCH", `${_data.OrgInfo.CrmUrl}/api/data/v${_data.OrgInfo.ApiVersion}/webresourceset(${existingFile.webresourceid})`);
+                req.open("PATCH", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/webresourceset(${existingFile.webresourceid})`);
                 req = this.setRequestHeaders(req, "application/json; charset=utf-8").then(response => {
                     req = response;
                     req.addEventListener("load", function() {
@@ -293,7 +283,7 @@ export class WebResourceProcessor {
         return new Promise<any>((resolve, reject) => {
             var xmlHttpRequest = require('xhr2');
 		    var req = new xmlHttpRequest();
-		    req.open("GET", `${_data.OrgInfo.CrmUrl}/api/data/v${_data.OrgInfo.ApiVersion}/solutions?\$select=friendlyname,solutionid,uniquename&\$filter=ismanaged eq false&\$orderby=friendlyname asc`);
+		    req.open("GET", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/solutions?\$select=friendlyname,solutionid,uniquename&\$filter=ismanaged eq false&\$orderby=friendlyname asc`);
 		    req = this.setRequestHeaders(req, "application/json; charset=utf-8").then(response => {
                 req = response;
                 req.addEventListener("load", function() {
@@ -316,7 +306,7 @@ export class WebResourceProcessor {
 		var xmlHttpRequest = require('xhr2');
 		var req = new xmlHttpRequest();
 
-		req.open("POST", `${_data.OrgInfo.CrmUrl}/api/data/v${_data.OrgInfo.ApiVersion}/AddSolutionComponent`);
+		req.open("POST", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/AddSolutionComponent`);
 		req = this.setRequestHeaders(req, "application/json").then(response => {
             req = response;
             req.addEventListener("load", function() {
@@ -336,7 +326,7 @@ export class WebResourceProcessor {
         return new Promise<any>((resolve, reject) => {
             let xmlHttpRequest = require('xhr2');
             let req = new xmlHttpRequest();
-            req.open("GET", `${_data.OrgInfo.CrmUrl}/api/data/v${_data.OrgInfo.ApiVersion}/webresourceset?\$select=content,contentjson,displayname,name,webresourceid&\$filter=name eq '${_prefix}${_selectedFile}'`);
+            req.open("GET", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/webresourceset?\$select=content,contentjson,displayname,name,webresourceid&\$filter=name eq '${this._prefix}${this._selectedFile}'`);
             this.setRequestHeaders(req, "application/json; charset=utf-8").then(response => {
                 req = response;
                 req.addEventListener("load", function() {
@@ -351,7 +341,7 @@ export class WebResourceProcessor {
     async getToken() : Promise<AccessToken> {
         if(_tokenResult === null || _tokenResult === undefined || _tokenResult.expiresOnTimestamp < Date.now()) {
             return new Promise<AccessToken>((resolve) => {
-                this.connection.getToken(`${_data.OrgInfo.CrmUrl}/.default`).then(res => {
+                this._connection.getToken(`${this._data.OrgInfo.CrmUrl}/.default`).then(res => {
                     _tokenResult = res;
                     resolve(res);
                 });
@@ -390,7 +380,7 @@ export class WebResourceProcessor {
 			/* eslint-enable */
 			var xmlHttpRequest = require('xhr2');
 		    var req = new xmlHttpRequest();
-		    req.open("POST", `${_data.OrgInfo.CrmUrl}/api/data/v${_data.OrgInfo.ApiVersion}/PublishXml`);
+		    req.open("POST", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/PublishXml`);
 		    req = await this.setRequestHeaders(req, "application/json; charset=utf-8");
 			req.addEventListener("load", function() {
 				if(req.status === 200 || req.status === 204){
