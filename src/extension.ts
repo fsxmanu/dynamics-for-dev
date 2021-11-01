@@ -1,25 +1,31 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
+import { WebResourceProcessor } from './webresource/webresource-processor';
+import { createTemplateFile } from './mapping/mapping-file-provider';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
-	
-	// Use the console to output diagnostic information (console.log) and errors (console.error)
-	// This line of code will only be executed once when your extension is activated
-	console.log('Congratulations, your extension "dynamics-for-dev" is now active!');
 
-	// The command has been defined in the package.json file
-	// Now provide the implementation of the command with registerCommand
-	// The commandId parameter must match the command field in package.json
-	let disposable = vscode.commands.registerCommand('dynamics-for-dev.helloWorld', () => {
-		// The code you place here will be executed every time your command is executed
-		// Display a message box to the user
-		vscode.window.showInformationMessage('Hello World from Dynamics-For-Dev!');
+	const workSpaceFolder = vscode.workspace.workspaceFolders;
+
+	if (workSpaceFolder === undefined) {
+		vscode.window.showErrorMessage("No workspace open. Please open a workspace");
+		return;
+	}
+	let basePath = workSpaceFolder[0].uri.path;
+
+	let uploadCommand = vscode.commands.registerCommand('dynamics-for-dev.uploadWebResource', () => new WebResourceProcessor(basePath).uploadWebResource());
+	context.subscriptions.push(uploadCommand);
+
+	let addJsonTemplateCommand = vscode.commands.registerCommand('dynamics-for-dev.addDynamicsConfig', () => {
+		createTemplateFile();
 	});
+	context.subscriptions.push(addJsonTemplateCommand);
 
-	context.subscriptions.push(disposable);
+	let uploadContextCommand = vscode.commands.registerCommand('dynamics-for-dev.uploadWebResourceContext', (file) => new WebResourceProcessor(basePath).uploadWebResourceContext(file));
+	context.subscriptions.push(uploadContextCommand);
 }
 
 // this method is called when your extension is deactivated
