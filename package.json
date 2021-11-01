@@ -11,7 +11,8 @@
   ],
   "activationEvents": [
     "onCommand:dynamics-for-dev.uploadWebResource",
-    "onCommand:dynamics-for-dev.addDynamicsConfig"
+    "onCommand:dynamics-for-dev.addDynamicsConfig",
+    "onCommand:dynamics-for-dev.uploadWebResourceContext"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -22,14 +23,24 @@
       },
       {
         "command": "dynamics-for-dev.addDynamicsConfig",
-        "title": "Add new dynamicsConfig"
+        "title": "Add Dynamics Config"
+      },
+      {
+        "command": "dynamics-for-dev.uploadWebResourceContext",
+        "title": "Upload WebResource To Dynamics"
       }
     ],
     "menus": {
       "explorer/context": [
         {
           "command": "dynamics-for-dev.addDynamicsConfig",
-          "group": "1_modification"
+          "group": "1_modification",
+          "when": "explorerResourceIsFolder"
+        },
+        {
+          "command": "dynamics-for-dev.uploadWebResourceContext",
+          "group": "1_modification",
+          "when": "resourceExtname == .js || .html || .css || .xml || .png || .jpg || .jpeg || .gif || .svg || .xap || .xsl || .ico || .resx"
         }
       ]
     }

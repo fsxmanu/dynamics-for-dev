@@ -24,10 +24,8 @@ export function activate(context: vscode.ExtensionContext) {
 	});
 	context.subscriptions.push(addJsonTemplateCommand);
 
-	let uploadContectCommand = vscode.commands.registerCommand('dynamics-for-dev.uploadWebResourceContext', () => {
-		createTemplateFile();
-	});
-	context.subscriptions.push(addJsonTemplateCommand);
+	let uploadContextCommand = vscode.commands.registerCommand('dynamics-for-dev.uploadWebResourceContext', (file) => new WebResourceProcessor(basePath).uploadWebResourceContext(file));
+	context.subscriptions.push(uploadContextCommand);
 }
 
 // this method is called when your extension is deactivated

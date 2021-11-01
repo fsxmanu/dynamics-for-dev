@@ -1,11 +1,10 @@
 import * as vscode from "vscode";
-import { DefaultAzureCredential, AccessToken, AzureCliCredentialOptions } from "@azure/identity";
-import { Helpers } from "../helpers";
+import { DefaultAzureCredential } from "@azure/identity";
 import * as fs from 'fs';
-
-let _tokenResult: AccessToken;
+import { DynamicsRequests } from "../connection/dynamics-requests";
 
 export class WebResourceProcessor {
+
     _prefix: string = "";
     _webResourceFolder: string = "";
     _data: any = null;
@@ -13,11 +12,14 @@ export class WebResourceProcessor {
     _rootPath: string;
     _connection: DefaultAzureCredential;
     _configFileLocation: string;
+    _fullPath : string = "";
+    _dynamicsRequest : DynamicsRequests;
 
     constructor(workSpaceRootPath: string) {
         this._rootPath = workSpaceRootPath;
         this._connection = new DefaultAzureCredential();
         this._configFileLocation = this._rootPath + '/dynamicsConfig.json';
+        this._dynamicsRequest = new DynamicsRequests(this._connection);
     }
 
     setUpRequiredVariables() {
@@ -27,6 +29,7 @@ export class WebResourceProcessor {
             this.getWebResourceFolder().then((webResourceFolder) => {
                 this._webResourceFolder = webResourceFolder;
                 this.determinePrefix().then((prefix) => {
+                    this._dynamicsRequest._prefix = prefix;
                     this._prefix = prefix;
                     resolve();
                 });
@@ -36,6 +39,7 @@ export class WebResourceProcessor {
 
     getConfigData() {
         if(fs.existsSync(this._configFileLocation)){
+            this._dynamicsRequest._data = JSON.parse(fs.readFileSync(this._configFileLocation, "utf-8"));
             this._data = JSON.parse(fs.readFileSync(this._configFileLocation, "utf-8"));
         }
         else {
@@ -43,16 +47,23 @@ export class WebResourceProcessor {
         }
     }
 
-    async uploadWebResourceContext(){
-        await this.getConfigData();
+    uploadWebResourceContext(file: any) {
+        this._selectedFile = file.path.replace(/^.*[\\\/]/, '');
+        this._dynamicsRequest._selectedFile = this._selectedFile;
+        this._fullPath = file.path.substring(0, file.path.lastIndexOf("/"));
+        this.getConfigData();
         if(this._data === null) { return; }
-        
+        this.determinePrefix().then((prefix) => {
+            this._prefix = prefix;
+            this.uploadWebResources();
+        });
     }
 
-    uploadWebResource(){
+    uploadWebResource() {
 		try {
             this.setUpRequiredVariables().then(() => {
                 this.readWebResources().then(() => {
+                    this._fullPath = this._rootPath + this._webResourceFolder;
                     this.uploadWebResources();
                 });
             });
@@ -121,6 +132,7 @@ export class WebResourceProcessor {
                 if(!selectedFile){ return; }
                 try {
                     this._selectedFile = selectedFile;
+                    this._dynamicsRequest._selectedFile = selectedFile;
                     resolve();
                 } catch (err){
                     vscode.window.showErrorMessage(`There was an error uploading your webresource, Reason: ${err}`);
@@ -136,7 +148,7 @@ export class WebResourceProcessor {
     
     uploadWebResources() {
 		try{
-            this.getWebResource().then((webResource) => {
+            this._dynamicsRequest.getWebResource().then((webResource) => {
                 if(webResource.value.length === 0) {
                     this.askToCreate();
                 }
@@ -152,24 +164,24 @@ export class WebResourceProcessor {
 
     uploadFile(isNew: boolean, existingFile?: any) {
 		let fileContent: string;
-		fileContent = fs.readFileSync(`${this._rootPath}${this._webResourceFolder}/${this._selectedFile}`, {encoding: 'base64'});
+		fileContent = fs.readFileSync(`${this._fullPath}/${this._selectedFile}`, {encoding: 'base64'});
 		if(isNew){
 			this.chooseWebResourceType().then(webResourceType => {
-                this.uploadNewWebResource(webResourceType, fileContent).then((match) => {
-                    this.publishWebResource(match).then(webresourceId => {
-                        this.addToSolution().then(solutions => {
-                            this.selectSolutionToAdd(solutions, webresourceId);
+                this._dynamicsRequest.uploadNewWebResource(webResourceType, fileContent).then((match) => {
+                    this._dynamicsRequest.publishWebResource(match).then(webresourceId => {
+                        this._dynamicsRequest.addToSolution().then(solutions => {
+                            this._dynamicsRequest.selectSolutionToAdd(solutions, webresourceId);
                         });
                     });
                 });
             });
 		}
 		else {
-			this.updateExistingWebResource(existingFile, fileContent).then(() => {
+			this._dynamicsRequest.updateExistingWebResource(existingFile, fileContent).then(() => {
                 if(this._data.UploadOptions.AddExistingToSolution === true){
                     this.askToAddToSolution(existingFile);
                 }
-                this.publishWebResource(existingFile.webresourceid);
+                this._dynamicsRequest.publishWebResource(existingFile.webresourceid);
             });
 		}
 	}
@@ -201,65 +213,12 @@ export class WebResourceProcessor {
         });
     }
 
-    uploadNewWebResource(webResourceType: string, fileContent: any) : Promise<string> {
-		try{
-            return new Promise<string>((resolve, reject) => {
-                let xmlHttpRequest = require('xhr2');
-                var req = new xmlHttpRequest();
-                let entity = Helpers.createEntity(fileContent, this._selectedFile, webResourceType, this._prefix);
-                req.open("POST", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/webresourceset`);
-                req = this.setRequestHeaders(req, "application/json; charset=utf-8").then(response => {
-                    req = response;
-                    req.addEventListener("load", function() {
-                        let regExp = /\(([^)]+)\)/;
-                        let matches = regExp.exec(req.getResponseHeader("OData-EntityId"));
-                        if(matches === undefined || matches === null || matches.length < 1) { return; }
-                        vscode.window.showInformationMessage("WebResource was uploaded to CRM successfully.");
-                        resolve(matches[1]);
-                    }, false);
-                    vscode.window.showInformationMessage("Uploading webresource...");
-                    req.send(entity);
-                });
-            });
-		} catch (err) {
-			vscode.window.showErrorMessage(`There was an error uploading your WebResource to CRM. Reason: ${err}`);
-			console.error(err);
-            return new Promise<string>((resolve, reject) => {
-                reject(err);
-            });
-		}
-	}
-
-	updateExistingWebResource(existingFile: any, fileContent: any) {
-        return new Promise<void>((resolve, reject) => {
-            var entity = { "content": fileContent };
-            try {
-                let xmlHttpRequest = require('xhr2');
-                var req = new xmlHttpRequest();
-                req.open("PATCH", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/webresourceset(${existingFile.webresourceid})`);
-                req = this.setRequestHeaders(req, "application/json; charset=utf-8").then(response => {
-                    req = response;
-                    req.addEventListener("load", function() {
-                        vscode.window.showInformationMessage("Resource was uploaded to CRM successfully.");
-                        resolve();
-                    }, false);
-                    vscode.window.showInformationMessage("Updating webresource...");
-                    req.send(JSON.stringify(entity));
-                });
-            } catch (err) {	
-                vscode.window.showErrorMessage(`There was an error uploading your WebResource to CRM. Reason: ${err}`);
-                console.error(err);	
-                reject(err);
-            }
-        });
-	}
-
     askToAddToSolution(existingFile: any) {
         vscode.window.showQuickPick(["Yes", "No"], { canPickMany: false, title: "Do you want to add the WebResource to a Solution?" }).then(selected => {
             if (!selected) { return; }
             if (selected === "Yes") {
-                this.addToSolution().then(solutions => {
-                    this.selectSolutionToAdd(solutions, existingFile.webresourceid);
+                this._dynamicsRequest.addToSolution().then(solutions => {
+                    this._dynamicsRequest.selectSolutionToAdd(solutions, existingFile.webresourceid);
                 });
             }
         }).then(undefined, err => { 
@@ -267,133 +226,4 @@ export class WebResourceProcessor {
 			console.error(err);	
 		});
     }
-
-    selectSolutionToAdd(solutions: any, fileId: any) {
-        vscode.window.showQuickPick(solutions, {canPickMany: false, title: "Select Solution to add the Web Resource to."}).then(selected => {
-            if(!selected){ return; }
-            this.addComponentToSolution(fileId, selected);		
-        })
-        .then(undefined, err => { 
-            vscode.window.showErrorMessage("There was an error getting the solutions");
-            console.error(err); 
-        });
-    }
-
-    addToSolution() : Promise<any> {
-        return new Promise<any>((resolve, reject) => {
-            var xmlHttpRequest = require('xhr2');
-		    var req = new xmlHttpRequest();
-		    req.open("GET", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/solutions?\$select=friendlyname,solutionid,uniquename&\$filter=ismanaged eq false&\$orderby=friendlyname asc`);
-		    req = this.setRequestHeaders(req, "application/json; charset=utf-8").then(response => {
-                req = response;
-                req.addEventListener("load", function() {
-                    let solutions = [""];
-                    let response = JSON.parse(req.response);
-                    response.value.forEach((element: any) => {
-                        if(element.uniquename !== "Active" && element.uniquename !== "Default"){
-                            solutions.push(element.uniquename);
-                        }
-                    });
-                    resolve(solutions);
-                }, false);
-                req.send();
-            });
-        });
-	}
-
-    addComponentToSolution(crmId: any, selectedSolution: string) {
-		let body = Helpers.createAddToSolutionRequestBody(crmId, selectedSolution);
-		var xmlHttpRequest = require('xhr2');
-		var req = new xmlHttpRequest();
-
-		req.open("POST", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/AddSolutionComponent`);
-		req = this.setRequestHeaders(req, "application/json").then(response => {
-            req = response;
-            req.addEventListener("load", function() {
-                if(req.status === 200){
-                    vscode.window.showInformationMessage("Component was added to solution successfully.");
-                }
-                else {
-                    vscode.window.showErrorMessage("There was an error while adding component to solution.");
-                }
-            }, false);
-            req.send(body);
-        });
-		
-	}
-
-    getWebResource() : Promise<any> {
-        return new Promise<any>((resolve, reject) => {
-            let xmlHttpRequest = require('xhr2');
-            let req = new xmlHttpRequest();
-            req.open("GET", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/webresourceset?\$select=content,contentjson,displayname,name,webresourceid&\$filter=name eq '${this._prefix}${this._selectedFile}'`);
-            this.setRequestHeaders(req, "application/json; charset=utf-8").then(response => {
-                req = response;
-                req.addEventListener("load", function() {
-                    let foundResources = JSON.parse(req.response);
-                    resolve(foundResources);
-                }, false);
-                req.send();
-            });
-        });
-    }
-
-    async getToken() : Promise<AccessToken> {
-        if(_tokenResult === null || _tokenResult === undefined || _tokenResult.expiresOnTimestamp < Date.now()) {
-            return new Promise<AccessToken>((resolve) => {
-                this._connection.getToken(`${this._data.OrgInfo.CrmUrl}/.default`).then(res => {
-                    _tokenResult = res;
-                    resolve(res);
-                });
-            });
-        }
-        else { 
-            return new Promise<AccessToken>((resolve) => resolve(_tokenResult));
-        }
-    }
-
-    setRequestHeaders(req: any, contentType: string): Promise<any> {
-        return new Promise<any>((resolve) => {
-            req.setRequestHeader("OData-MaxVersion", "4.0");
-            req.setRequestHeader("OData-Version", "4.0");
-            req.setRequestHeader("Accept", "application/json");
-            req.setRequestHeader("Content-Type", contentType);
-            this.getToken().then(() => {
-                req.setRequestHeader("Authorization", "Bearer " + _tokenResult.token);
-                resolve(req);
-            });
-        });
-        // req.open, req.send and addeventlistener has to be done in the individual funcitons.
-    }
-
-    async publishWebResource(webresourceid: any) : Promise<string> {
-        
-		return new Promise(async (resolve, reject) => {
-			/* eslint-disable */
-			var parameters = {
-				"ParameterXml" : `<importexportxml>
-				<webresources>
-				<webresource>{${webresourceid}}</webresource>
-				</webresources>
-				</importexportxml>`
-			};
-			/* eslint-enable */
-			var xmlHttpRequest = require('xhr2');
-		    var req = new xmlHttpRequest();
-		    req.open("POST", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/PublishXml`);
-		    req = await this.setRequestHeaders(req, "application/json; charset=utf-8");
-			req.addEventListener("load", function() {
-				if(req.status === 200 || req.status === 204){
-					vscode.window.showInformationMessage("Component was published successfully.");
-					resolve(webresourceid);
-				}
-				else {
-					vscode.window.showErrorMessage("There was an error while publishing your component.");
-					reject(req.status);
-				}
-			}, false);
-			vscode.window.showInformationMessage("Component is publishing, please wait...");
-			req.send(JSON.stringify(parameters));
-		});
-	}
 }
