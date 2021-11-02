@@ -18,12 +18,21 @@ To check just search for `Azure: Sign In` in your Command Palette and sign in.
 
 First you need to create a dynamicsConfig.json file. For this you just right click in your Visual Studio workspace explorer and select the new menu point "Add new dynamicsConfig.json".
 
+<img src="https://user-images.githubusercontent.com/22397350/139916131-9f98f188-f081-44b8-93cc-794d159be026.png" alt="drawing" width="350"/>
+
+
 Then you need to configure the json so you can upload the webresource. The target is that you only need to do this once.
 
 After that:
 
 You can call the upload command via the command palette in vs code. Search for "Dynamics-For-Dev: Upload WebResource" and follow the instructions.
 Alternatively you can right click a supported file (See [Supported Files](#supported-files)) and use the "Upload to Dynamics" command in the context menu.
+
+<img src="https://user-images.githubusercontent.com/22397350/139915944-61c32ebe-32d9-45a7-9f67-185f010154b2.png" alt="drawing" width="350"/>
+
+To downlaod web resources from dynamics you can right click on your folder and choose "" and then follow the instructions.
+
+<img src="https://user-images.githubusercontent.com/22397350/139916084-ede34b40-e418-4009-9cf3-9a2028dfb290.png" alt="drawing" width="400"/>
 
 **NamingConvention** 
 
@@ -77,6 +86,14 @@ Alternatively you can right click a supported file (See [Supported Files](#suppo
 Errorhandling isn't aways giving feedback to the user. Will be corrected.
 
 ## Release Notes
+
+### 0.6.2
+
+Updated version for the marketplace
+
+### 0.6.1
+
+Marketplace infos added
 
 ### 0.6.0
 
