@@ -2,13 +2,21 @@
   "name": "dynamics-for-dev",
   "displayName": "Dynamics-For-Dev",
   "publisher": "MSteiner",
-  "description": "An extension that supports you while developing for Dynamics 365",
-  "version": "0.6.0",
+  "description": "An extension that supports you while developing for Dynamics 365/PowerPlatform/CRM",
+  "version": "0.6.1",
   "engines": {
     "vscode": "^1.61.0"
   },
   "categories": [
-    "Other"
+    "Other",
+    "Extension Packs"
+  ],
+  "keywords": [
+    "Dynamics",
+    "PowerPlatform",
+    "CRM",
+    "WebResource",
+    "Customer Engagement"
   ],
   "icon": "DynamicsForDev-Logo.PNG",
   "activationEvents": [
