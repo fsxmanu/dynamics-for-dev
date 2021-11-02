@@ -2,8 +2,9 @@ import * as vscode from "vscode";
 import { DefaultAzureCredential } from "@azure/identity";
 import * as fs from 'fs';
 import { DynamicsRequests } from "../connection/dynamics-requests";
+import { Helpers } from "../helpers";
 
-export class WebResourceProcessor {
+export class WebResourceUploader {
 
     _prefix: string = "";
     _webResourceFolder: string = "";
@@ -28,7 +29,7 @@ export class WebResourceProcessor {
             if(this._data === null) { return; }
             this.getWebResourceFolder().then((webResourceFolder) => {
                 this._webResourceFolder = webResourceFolder;
-                this.determinePrefix().then((prefix) => {
+                Helpers.determinePrefix(this._data).then((prefix) => {
                     this._dynamicsRequest._prefix = prefix;
                     this._prefix = prefix;
                     resolve();
@@ -53,7 +54,8 @@ export class WebResourceProcessor {
         this._fullPath = file.path.substring(0, file.path.lastIndexOf("/"));
         this.getConfigData();
         if(this._data === null) { return; }
-        this.determinePrefix().then((prefix) => {
+        Helpers.determinePrefix(this._data).then((prefix) => {
+            this._dynamicsRequest._prefix = prefix;
             this._prefix = prefix;
             this.uploadWebResources();
         });
@@ -95,36 +97,6 @@ export class WebResourceProcessor {
         });
     }
 
-    determinePrefix() : Promise<string> {
-        return new Promise<string>((resolve, reject) =>
-        {
-            let prefixOptions = this._data.NamingConvention.Prefix;
-            if(prefixOptions.length > 1){
-                this.getPrefix().then((prefix) => {
-                resolve(prefix);
-                });
-            }else {
-                return new Promise((resolve) =>  resolve(this._data.NamingConvention.Prefix));
-            }
-        });
-    }
-
-    getPrefix(): Promise<string> {
-        return new Promise<string>((resolve, reject) => {
-            let prefixOptions = this._data.NamingConvention.Prefix;
-        
-            let options = [];
-            for(let i = 0; i < prefixOptions.length; i++) {
-                options.push(prefixOptions[i]);
-            }
-            vscode.window.showQuickPick(options, { canPickMany: false, title: "Please select the Prefix which should be used" }).then(selectedPrefix =>
-            {
-                if(!selectedPrefix){ resolve("new_"); }
-                resolve(selectedPrefix);
-            });
-        });
-    }
-
     readWebResources() : Promise<void>{ 
         return new Promise((resolve, reject) => {
             let webResources = fs.readdirSync(this._rootPath + this._webResourceFolder);
@@ -148,7 +120,8 @@ export class WebResourceProcessor {
     
     uploadWebResources() {
 		try{
-            this._dynamicsRequest.getWebResource().then((webResource) => {
+            var filter = `filter=name eq '${this._prefix}${this._selectedFile}'`;
+            this._dynamicsRequest.getWebResource(filter).then((webResource) => {
                 if(webResource.value.length === 0) {
                     this.askToCreate();
                 }

@@ -3,7 +3,7 @@
   "displayName": "Dynamics-For-Dev",
   "publisher": "MSteiner",
   "description": "An extension that supports you while developing for Dynamics 365",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "engines": {
     "vscode": "^1.61.0"
   },
@@ -14,7 +14,8 @@
   "activationEvents": [
     "onCommand:dynamics-for-dev.uploadWebResource",
     "onCommand:dynamics-for-dev.addDynamicsConfig",
-    "onCommand:dynamics-for-dev.uploadWebResourceContext"
+    "onCommand:dynamics-for-dev.uploadWebResourceContext",
+    "onCommand:dynamics-for-dev.downloadWebResourceContext"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -30,6 +31,10 @@
       {
         "command": "dynamics-for-dev.uploadWebResourceContext",
         "title": "Upload WebResource To Dynamics"
+      },
+      {
+        "command": "dynamics-for-dev.downloadWebResourceContext",
+        "title": "Download WebResource From Dynamics"
       }
     ],
     "menus": {
@@ -43,6 +48,11 @@
           "command": "dynamics-for-dev.uploadWebResourceContext",
           "group": "1_modification",
           "when": "resourceExtname == .js || .html || .css || .xml || .png || .jpg || .jpeg || .gif || .svg || .xap || .xsl || .ico || .resx"
+        },
+        {
+          "command": "dynamics-for-dev.downloadWebResourceContext",
+          "group": "1_modification",
+          "when": "explorerResourceIsFolder"
         }
       ]
     }

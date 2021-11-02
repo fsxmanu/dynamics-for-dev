@@ -150,11 +150,11 @@ export class DynamicsRequests {
 		
 	}
 
-    getWebResource() : Promise<any> {
+    getWebResource(filter: string) : Promise<any> {
         return new Promise<any>((resolve, reject) => {
             let xmlHttpRequest = require('xhr2');
             let req = new xmlHttpRequest();
-            req.open("GET", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/webresourceset?\$select=content,contentjson,displayname,name,webresourceid&\$filter=name eq '${this._prefix}${this._selectedFile}'`);
+            req.open("GET", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/webresourceset?\$select=content,contentjson,displayname,name,webresourceid&\$${filter}`);
             this.setRequestHeaders(req, "application/json; charset=utf-8").then(response => {
                 req = response;
                 req.addEventListener("load", function() {

@@ -1,4 +1,36 @@
+import * as vscode from "vscode";
+
 export class Helpers {
+
+    static determinePrefix(data: any) : Promise<string> {
+        return new Promise<string>((resolve, reject) =>
+        {
+            let prefixOptions = data.NamingConvention.Prefix;
+            if(prefixOptions.length > 1){
+                this.getPrefix(data).then((prefix) => {
+                resolve(prefix);
+                });
+            }else {
+                return new Promise((resolve) =>  resolve(data.NamingConvention.Prefix));
+            }
+        });
+    }
+
+    static getPrefix(data: any): Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            let prefixOptions = data.NamingConvention.Prefix;
+        
+            let options = [];
+            for(let i = 0; i < prefixOptions.length; i++) {
+                options.push(prefixOptions[i]);
+            }
+            vscode.window.showQuickPick(options, { canPickMany: false, title: "Please select the Prefix which should be used" }).then(selectedPrefix =>
+            {
+                if(!selectedPrefix){ resolve("new_"); }
+                resolve(selectedPrefix);
+            });
+        });
+    }
 
     static getWebResourceType(webResourceType: string): number {
 	    /* eslint-disable */
