@@ -78,6 +78,10 @@ Errorhandling isn't aways giving feedback to the user. Will be corrected.
 
 ## Release Notes
 
+### 0.6.0
+
+Downloading WebResources now possible by right clicking a folder in your project
+
 ### 0.5.0
 
-Initial release. Uplaoding WebResource to Dynamics now possible
+Initial release. Uploading WebResource to Dynamics now possible
