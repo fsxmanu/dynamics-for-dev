@@ -23,7 +23,8 @@
     "onCommand:dynamics-for-dev.uploadWebResource",
     "onCommand:dynamics-for-dev.addDynamicsConfig",
     "onCommand:dynamics-for-dev.uploadWebResourceContext",
-    "onCommand:dynamics-for-dev.downloadWebResourceContext"
+    "onCommand:dynamics-for-dev.downloadWebResourceContext",
+    "onCommand:dynamics-for-dev.exportSolutionContext"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -43,6 +44,10 @@
       {
         "command": "dynamics-for-dev.downloadWebResourceContext",
         "title": "Download WebResource From Dynamics"
+      },
+      {
+        "command": "dynamics-for-dev.exportSolutionContext",
+        "title": "Export Solution From Dynamics"
       }
     ],
     "menus": {
@@ -59,6 +64,11 @@
         },
         {
           "command": "dynamics-for-dev.downloadWebResourceContext",
+          "group": "1_modification",
+          "when": "explorerResourceIsFolder"
+        },
+        {
+          "command": "dynamics-for-dev.exportSolutionContext",
           "group": "1_modification",
           "when": "explorerResourceIsFolder"
         }
@@ -102,6 +112,7 @@
   },
   "dependencies": {
     "@azure/identity": "^2.0.1",
+    "open": "^8.4.0",
     "xhr2": "^0.2.1"
   },
   "extensionDependencies": [

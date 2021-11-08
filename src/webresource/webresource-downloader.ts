@@ -3,7 +3,6 @@ import { DefaultAzureCredential } from "@azure/identity";
 import * as fs from 'fs';
 import { DynamicsRequests } from "../connection/dynamics-requests";
 import { Helpers } from "../helpers";
-import { title } from "process";
 
 export interface WebResourceRecord {
     [key: string]: string;

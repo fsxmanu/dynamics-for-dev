@@ -4,6 +4,7 @@ import * as vscode from 'vscode';
 import { WebResourceUploader } from './webresource/webresource-uploader';
 import { createTemplateFile } from './mapping/mapping-file-provider';
 import { WebResourceDownloader } from './webresource/webresource-downloader';
+import { SolutionExporter } from './solution/solution-exporter';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -30,6 +31,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let downloadContextCommand = vscode.commands.registerCommand('dynamics-for-dev.downloadWebResourceContext', (folder) => new WebResourceDownloader(basePath).downloadWebResourceContext(folder));
 	context.subscriptions.push(downloadContextCommand);
+
+	let exportSolution = vscode.commands.registerCommand('dynamics-for-dev.exportSolutionContext', () => new SolutionExporter(basePath).exportSolutionContext());
+	context.subscriptions.push(exportSolution);
 }
 
 // this method is called when your extension is deactivated

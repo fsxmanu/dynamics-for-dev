@@ -12,7 +12,8 @@ export function returnUploadConfig() : string {
         },
         "UploadOptions" : {
             "AddExistingToSolution" : false
-        }
+        },
+        "Solutions" : [ ]
     }`;
     return config;
 }
