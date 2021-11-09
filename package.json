@@ -3,7 +3,7 @@
   "displayName": "Dynamics For Dev",
   "publisher": "MSteiner",
   "description": "An extension that supports you while developing for Dynamics 365/PowerPlatform/CRM",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "engines": {
     "vscode": "^1.61.0"
   },

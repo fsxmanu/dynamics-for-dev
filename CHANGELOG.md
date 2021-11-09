@@ -1,9 +1,25 @@
 # Change Log
 
-All notable changes to the "dynamics-for-dev" extension will be documented in this file.
+### 0.7.1 - Added Changelog
 
-Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
+Added this changelog with history of previous releases
 
-## [Unreleased]
+### 0.7.0 - Added Export Solution functionality
 
-- Initial release
+Added context menu to export dynamics solution
+
+### 0.6.2
+
+Updated version for the marketplace
+
+### 0.6.1
+
+Marketplace infos added
+
+### 0.6.0 - Download Web Resource feature
+
+Downloading WebResources now possible by right clicking a folder in your project
+
+### 0.5.0 - Initial Release
+
+Initial release. Uploading WebResource to Dynamics now possible
