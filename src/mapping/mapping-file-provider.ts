@@ -8,12 +8,14 @@ export function returnUploadConfig() : string {
         },
         "OrgInfo" : {
             "CrmUrl" : "https://yourorganization.yourregion.dynamics.com",
-            "ApiVersion" : "9.1"
+            "ApiVersion" : "9.1",
+            "Publisher" : ""
         },
         "UploadOptions" : {
             "AddExistingToSolution" : false
         },
-        "Solutions" : [ ]
+        "Solutions" : [ ],
+        RibbonEntities: [ "account" ]
     }`;
     return config;
 }

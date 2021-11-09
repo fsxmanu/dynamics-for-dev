@@ -61,11 +61,11 @@ export class Helpers {
         });
     }
 
-    static createAddToSolutionRequestBody(crmId: any, selectedSolution: any): string{
+    static createAddToSolutionRequestBody(crmId: any, selectedSolution: any, componentType: number): string{
         /* eslint-disable */
         return JSON.stringify({
             "ComponentId": crmId,
-            "ComponentType": 61,
+            "ComponentType": componentType,
             "SolutionUniqueName": selectedSolution,
             "AddRequiredComponents": false
         });

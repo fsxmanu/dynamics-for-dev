@@ -5,6 +5,7 @@ import { WebResourceUploader } from './webresource/webresource-uploader';
 import { createTemplateFile } from './mapping/mapping-file-provider';
 import { WebResourceDownloader } from './webresource/webresource-downloader';
 import { SolutionExporter } from './solution/solution-exporter';
+import { RibbonManager } from './ribbon-manager/ribbon-functions';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -34,6 +35,9 @@ export function activate(context: vscode.ExtensionContext) {
 
 	let exportSolution = vscode.commands.registerCommand('dynamics-for-dev.exportSolutionContext', (folder) => new SolutionExporter(basePath).exportSolutionContext(folder));
 	context.subscriptions.push(exportSolution);
+
+	let ribbonManager = vscode.commands.registerCommand('dynamics-for-dev.getRibbonInformation', () => new RibbonManager(basePath).getRibbonInformation());
+	context.subscriptions.push(ribbonManager);
 }
 
 // this method is called when your extension is deactivated

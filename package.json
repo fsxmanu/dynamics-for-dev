@@ -24,7 +24,8 @@
     "onCommand:dynamics-for-dev.addDynamicsConfig",
     "onCommand:dynamics-for-dev.uploadWebResourceContext",
     "onCommand:dynamics-for-dev.downloadWebResourceContext",
-    "onCommand:dynamics-for-dev.exportSolutionContext"
+    "onCommand:dynamics-for-dev.exportSolutionContext",
+    "onCommand:dynamics-for-dev.getRibbonInformation"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -48,6 +49,10 @@
       {
         "command": "dynamics-for-dev.exportSolutionContext",
         "title": "Export Solution From Dynamics"
+      },
+      {
+        "command": "dynamics-for-dev.getRibbonInformation",
+        "title": "Dynamics-For-Dev: Get Ribbon Information"
       }
     ],
     "menus": {
@@ -89,7 +94,7 @@
   "devDependencies": {
     "@types/glob": "^7.1.4",
     "@types/mocha": "^9.0.0",
-    "@types/node": "14.x",
+    "@types/node": "^14.17.33",
     "@types/vscode": "^1.61.0",
     "@typescript-eslint/eslint-plugin": "^4.31.1",
     "@typescript-eslint/parser": "^4.31.1",
@@ -112,6 +117,9 @@
   },
   "dependencies": {
     "@azure/identity": "^2.0.1",
+    "got": "^11.8.2",
+    "node-fetch": "^2.6.6",
+    "node-stream-zip": "^1.15.0",
     "open": "^8.4.0",
     "xhr2": "^0.2.1"
   },

@@ -1,6 +1,7 @@
 import { AccessToken, DefaultAzureCredential } from "@azure/identity";
 import * as vscode from "vscode";
 import { Helpers } from "../helpers";
+import * as fs from 'fs';
 
 let _tokenResult: AccessToken;
 
@@ -99,7 +100,8 @@ export class DynamicsRequests {
     selectSolutionToAdd(solutions: any, fileId: any) {
         vscode.window.showQuickPick(solutions, {canPickMany: false, title: "Select Solution to add the Web Resource to."}).then(selected => {
             if(!selected){ return; }
-            this.addComponentToSolution(fileId, selected);		
+            let body = Helpers.createAddToSolutionRequestBody(fileId, selected, 61);
+            this.addComponentToSolution(body);		
         })
         .then(undefined, err => { 
             vscode.window.showErrorMessage("There was an error getting the solutions");
@@ -129,25 +131,27 @@ export class DynamicsRequests {
         });
 	}
 
-    addComponentToSolution(crmId: any, selectedSolution: string) {
-		let body = Helpers.createAddToSolutionRequestBody(crmId, selectedSolution);
-		var xmlHttpRequest = require('xhr2');
-		var req = new xmlHttpRequest();
+    addComponentToSolution(body: any) : Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            var xmlHttpRequest = require('xhr2');
+            var req = new xmlHttpRequest();
 
-		req.open("POST", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/AddSolutionComponent`);
-		req = this.setRequestHeaders(req, "application/json").then(response => {
-            req = response;
-            req.addEventListener("load", function() {
-                if(req.status === 200){
-                    vscode.window.showInformationMessage("Component was added to solution successfully.");
-                }
-                else {
-                    vscode.window.showErrorMessage("There was an error while adding component to solution.");
-                }
-            }, false);
-            req.send(body);
+            req.open("POST", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/AddSolutionComponent`);
+            req = this.setRequestHeaders(req, "application/json").then(response => {
+                req = response;
+                req.addEventListener("load", function() {
+                    if(req.status === 200){
+                        vscode.window.showInformationMessage("Component was added to solution successfully.");
+                        resolve();
+                    }
+                    else {
+                        vscode.window.showErrorMessage("There was an error while adding component to solution.");
+                        resolve();
+                    }
+                }, false);
+                req.send(body);
+            });
         });
-		
 	}
 
     getWebResource(filter: string) : Promise<any> {
@@ -162,6 +166,28 @@ export class DynamicsRequests {
                     resolve(foundResources);
                 }, false);
                 req.send();
+            });
+        });
+    }
+
+    exportSolution(solutionName: any, solutionPath: string) : Promise<any> {
+        return new Promise<any>((resolve, reject) => {
+            let parameters : any = {};
+            parameters.SolutionName = solutionName;
+            parameters.Managed = false;
+
+            let xmlHttpRequest = require('xhr2');
+            let req = new xmlHttpRequest();
+            req.open("POST", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/ExportSolution`);
+            this.setRequestHeaders(req, "application/json; charset=utf-8").then((response) => {
+                req = response;
+                req.addEventListener("load", () => {
+                    let result = JSON.parse(req.response);
+                    let fullFilePath = solutionPath + "/" + solutionName + ".zip";
+                    fs.writeFileSync(fullFilePath, result.ExportSolutionFile, { encoding: "base64" });
+                    resolve(fullFilePath);
+                }, false);
+                req.send(JSON.stringify(parameters));
             });
         });
     }
