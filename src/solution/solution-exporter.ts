@@ -39,18 +39,21 @@ export class SolutionExporter {
         }
     }
 
-    async exportSolutionContext(){
+    async exportSolutionContext(folder: any){
+        this._fullPath = folder.path;
         await this.setUpRequiredVariables();
         if(this._data.Solutions === undefined) {
-            this.getSolutionFromDynamics(`$filter=ismanaged eq false`).then(solutions => {
-                vscode.window.showQuickPick(solutions).then((solution) => {
-                    this.exportSolution(solution);
+            this.getSolutionFromDynamics(`filter=ismanaged eq false`).then(solutions => {
+                vscode.window.showQuickPick(solutions).then((solutionName) => {
+                    this.getSolutionFromDynamics(`filter=uniquename eq '${solutionName}'`).then(solution => {
+                        this.exportSolution(solution);
+                    });
                 });
             });
         }
         else {
             vscode.window.showQuickPick(this._data.Solutions).then((solutionName) => {
-                this.getSolutionFromDynamics(`$filter=uniquename eq ${solutionName}`).then (solution => {
+                this.getSolutionFromDynamics(`filter=uniquename eq '${solutionName}'`).then (solution => {
                     this.exportSolution(solution);
                 });
             });
@@ -58,23 +61,41 @@ export class SolutionExporter {
     }
 
     exportSolution(solution: any) {
+        if(solution.length === 0) { 
+            vscode.window.showErrorMessage("No Solution found to export");
+            return;
+        }
+        let parameters : any = {};
+        parameters.SolutionName = solution[0];
+        parameters.Managed = false;
 
+        let xmlHttpRequest = require('xhr2');
+        let req = new xmlHttpRequest();
+        req.open("POST", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/ExportSolution`);
+        this._dynamicsRequest.setRequestHeaders(req, "application/json; charset=utf-8").then((response) => {
+            req = response;
+            req.addEventListener("load", () => {
+                let result = JSON.parse(req.response);
+                let fullFilePath = this._fullPath + "/" + solution[0] + ".zip";
+                fs.writeFileSync(fullFilePath, result.ExportSolutionFile, { encoding: "base64" });
+                console.log("success");
+            }, false);
+            req.send(JSON.stringify(parameters));
+        });
     }
 
     getSolutionFromDynamics(filter: string) {
         return new Promise<any>((resolve) => {
-            var xmlHttpRequest = require('xhr2');
-		    var req = new xmlHttpRequest();
-		    req.open("GET", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/solutions?` + "\"" + filter);
+            let xmlHttpRequest = require('xhr2');
+		    let req = new xmlHttpRequest();
+		    req.open("GET", this._data.OrgInfo.CrmUrl + "/api/data/v" + this._data.OrgInfo.ApiVersion + "/solutions?\$" + filter);
 		    req = this._dynamicsRequest.setRequestHeaders(req, "application/json; charset=utf-8").then(response => {
                 req = response;
                 req.addEventListener("load", function() {
-                    let solutions = [""];
+                    let solutions : any = [];
                     let response = JSON.parse(req.response);
                     response.value.forEach((element: any) => {
-                        if(element.uniquename !== "Active" && element.uniquename !== "Default"){
-                            solutions.push(element.uniquename);
-                        }
+                        solutions.push(element.uniquename);
                     });
                     resolve(solutions);
                 }, false);

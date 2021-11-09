@@ -32,7 +32,7 @@ export function activate(context: vscode.ExtensionContext) {
 	let downloadContextCommand = vscode.commands.registerCommand('dynamics-for-dev.downloadWebResourceContext', (folder) => new WebResourceDownloader(basePath).downloadWebResourceContext(folder));
 	context.subscriptions.push(downloadContextCommand);
 
-	let exportSolution = vscode.commands.registerCommand('dynamics-for-dev.exportSolutionContext', () => new SolutionExporter(basePath).exportSolutionContext());
+	let exportSolution = vscode.commands.registerCommand('dynamics-for-dev.exportSolutionContext', (folder) => new SolutionExporter(basePath).exportSolutionContext(folder));
 	context.subscriptions.push(exportSolution);
 }
 
