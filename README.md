@@ -44,6 +44,12 @@ To downlaod web resources from dynamics you can right click on your folder and c
 `CrmUrl`: your environments url. Don't use the "/" at the end. <br/>
 `ApiVersion`: The api version in your dynamics. This is 9.1 by default. <br/>
 
+**Solutions**
+
+This is an array of the uniquenames for your solutions. <br/>
+You will be prompted to choose one of the solution to export. Exporting multiple solutions is not supported at the moment. <br/>
+If you do not include this option in your json the extension will get every unmanaged solution in your system for you to select.<br/>
+
 *Sample*
 
 ```
@@ -58,7 +64,8 @@ To downlaod web resources from dynamics you can right click on your folder and c
     },
     "UploadOptions" : {
         "AddExistingToSolution" : false
-    }
+    },
+    "Solutions" : [ "MyCustomizationSolution", "MyPluginSolution" ]
 }
 ```
 
@@ -83,9 +90,13 @@ To downlaod web resources from dynamics you can right click on your folder and c
 
 ## Known Issues
 
-Errorhandling isn't aways giving feedback to the user. Will be corrected.
+Errorhandling isn't aways giving feedback to the user. Will be corrected. If you experience an error please create an issue on the github page or message the author.
 
 ## Release Notes
+
+### 0.7.0 - Added Export Solution functionality
+
+Added context menu to export dynamics solution
 
 ### 0.6.2
 

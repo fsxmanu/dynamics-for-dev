@@ -43,7 +43,7 @@ export class SolutionExporter {
         this._fullPath = folder.path;
         await this.setUpRequiredVariables();
         if(this._data.Solutions === undefined) {
-            this.getSolutionFromDynamics(`filter=ismanaged eq false`).then(solutions => {
+            this.getSolutionFromDynamics("select=uniquename&\$filter=ismanaged eq false").then(solutions => {
                 vscode.window.showQuickPick(solutions).then((solutionName) => {
                     this.getSolutionFromDynamics(`filter=uniquename eq '${solutionName}'`).then(solution => {
                         this.exportSolution(solution);
