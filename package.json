@@ -121,7 +121,8 @@
     "node-fetch": "^2.6.6",
     "node-stream-zip": "^1.15.0",
     "open": "^8.4.0",
-    "xhr2": "^0.2.1"
+    "xhr2": "^0.2.1",
+    "xml2js": "^0.4.23"
   },
   "extensionDependencies": [
     "ms-vscode.azure-account"
