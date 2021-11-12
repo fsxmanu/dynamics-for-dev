@@ -44,32 +44,12 @@ export class RibbonManager {
     async getRibbonInformation(){
         await this.setUpRequiredVariables();
         const xml2js = require('xml2js');
-
-        // convert XML to JSON
-        xml2js.parseString(xml, (err: any, result: any) => {
-            if(err) {
-                throw err;
-            }
-
-            // `result` is a JavaScript object
-            // convert it to a JSON string
-            const json = JSON.stringify(result, null, 4);
-            let panel = vscode.window.createWebviewPanel('ribbonEditor', "Ribbon Editor", vscode.ViewColumn.One, {});
-            const updateWebView = () => {
-                const welcome4 = Convert.toWelcome4(json);
-                panel.webview.html = this.getWebViewContent(welcome4);
-            };
-            updateWebView();
-            // var htmlTemplate = HtmlService.createTemplateFromFile('template-client');
-            // htmlTemplate.dataFromServerTemplate = { first: "hello", last: "world" };
-            // var htmlOutput = htmlTemplate.evaluate().setSandboxMode(HtmlService.SandboxMode.IFRAME)
-            //     .setTitle('sample');
-            // return htmlOutput;
-
-            // log JSON string
-            console.log(json);
-            
-        });
+        let panel = vscode.window.createWebviewPanel('ribbonEditor', "Ribbon Editor", vscode.ViewColumn.One, {});
+        const updateWebView = () => {
+            panel.webview.html = this.getWebViewContent();
+        };
+        updateWebView();
+        
         return;
         vscode.window.showQuickPick(this._data.RibbonEntities, { canPickMany : false }).then((entityName) => {
             if(!entityName) { return; }
@@ -91,25 +71,11 @@ export class RibbonManager {
         });
     }
 
-    getWebViewContent(json: Welcome4) {
+    getWebViewContent() {
         return `<!DOCTYPE html>
-
-        <script>
-            Welcome4 data = ${json}; //Stores the data directly in the javascript code
-            debugger;
-            // sample usage
-            //function initialize() {
-            //    document.getElementById("myTitle").innerText = data.first + " - " + data.last;
-                //or use jquery:  $("#myTitle").text(data.first + " - " + data.last);
-            //}
-            // use onload or use jquery to call your initialization after the document loads
-            //window.onload = initialize;
-        </script>
-        
-        
         <html>
         <body>
-            <H2 id="myTitle">Hallo</H2>
+          <iframe src="${vscode.Uri.parse(this._data.OrgInfo.CrmUrl)}" height="100%" width="100%" title="Iframe Example"></iframe>
         </body>
         </html>`;
     }
