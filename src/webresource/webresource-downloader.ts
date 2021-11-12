@@ -80,9 +80,18 @@ export class WebResourceDownloader {
     }
 
     getConfigData() {
-        if(fs.existsSync(this._configFileLocation)){
-            this._dynamicsRequest._data = JSON.parse(fs.readFileSync(this._configFileLocation, "utf-8"));
-            this._data = JSON.parse(fs.readFileSync(this._configFileLocation, "utf-8"));
+        var windowsSystemRegex = /(\/[A-Za-z]:\/\w+)/g;
+        let match = this._configFileLocation.match(windowsSystemRegex);
+        let configPath;
+        if(match !== null) {
+            configPath = this._configFileLocation.substring(1, this._configFileLocation.length);
+        }
+        else {
+            configPath = this._configFileLocation;
+        }
+        if(fs.existsSync(configPath)){
+            this._dynamicsRequest._data = JSON.parse(fs.readFileSync(configPath, "utf-8"));
+            this._data = JSON.parse(fs.readFileSync(configPath, "utf-8"));
         }
         else {
             vscode.window.showErrorMessage(`No dynamicsConfig.json file was found. Please add one in ${this._rootPath}`);
