@@ -43,12 +43,11 @@ export class SolutionExporter {
         this._fullPath = folder.path;
         await this.setUpRequiredVariables();
         if(this._data.Solutions === undefined) {
-            this.getSolutionFromDynamics("select=uniquename&\$filter=ismanaged eq false").then(solutions => {
-                vscode.window.showQuickPick(solutions).then((solutionName) => {
-                    this.getSolutionFromDynamics(`filter=uniquename eq '${solutionName}'`).then(solution => {
-                        this.exportSolution(solution);
-                    });
-                });
+            let solutions = await this.getSolutionFromDynamics("select=uniquename&\$filter=ismanaged eq false");
+            vscode.window.showQuickPick(solutions).then(async (solutionName) => {
+                if(!solutionName || solutionName === "") { return; }
+                let solution = await this.getSolutionFromDynamics(`filter=uniquename eq '${solutionName}'`);
+                this.exportSolution(solution);
             });
         }
         else {
@@ -61,6 +60,7 @@ export class SolutionExporter {
     }
 
     exportSolution(solution: any) {
+        vscode.window.showInformationMessage("Exporting solution. Please wait...");
         if(solution.length === 0) { 
             vscode.window.showErrorMessage("No Solution found to export");
             return;
@@ -78,7 +78,7 @@ export class SolutionExporter {
                 let result = JSON.parse(req.response);
                 let fullFilePath = this._fullPath + "/" + solution[0] + ".zip";
                 fs.writeFileSync(fullFilePath, result.ExportSolutionFile, { encoding: "base64" });
-                console.log("success");
+                vscode.window.showInformationMessage("Solution export successfully");
             }, false);
             req.send(JSON.stringify(parameters));
         });
