@@ -3,6 +3,7 @@ import { DefaultAzureCredential } from "@azure/identity";
 import * as fs from 'fs';
 import { DynamicsRequests } from "../connection/dynamics-requests";
 import { Helpers } from "../helpers";
+import { Mapper } from "../mapping/mapping-file-provider";
 
 export interface WebResourceRecord {
     [key: string]: string;
@@ -21,16 +22,17 @@ export class WebResourceDownloader {
     _dynamicsRequest : DynamicsRequests;
 
     constructor(workSpaceRootPath: string) {
-        this._rootPath = workSpaceRootPath;
+        this._rootPath = Mapper.fixPath(workSpaceRootPath);
         this._connection = new DefaultAzureCredential();
         this._configFileLocation = this._rootPath + '/dynamicsConfig.json';
         this._dynamicsRequest = new DynamicsRequests(this._connection);
     }
 
     downloadWebResourceContext(folder: any) {
-        this._fullPath = folder.path;
-        this._webResourceFolder = folder.path;
-        this.getConfigData();
+        this._fullPath = Mapper.fixPath(folder.path);
+        this._webResourceFolder = this._fullPath;
+        this._dynamicsRequest._data = Mapper.getConfigData(this._configFileLocation);
+        this._data = this._dynamicsRequest._data;
         if(this._data === null) { return; }
         Helpers.determinePrefix(this._data).then((prefix) => {
             this._prefix = prefix;
@@ -68,8 +70,9 @@ export class WebResourceDownloader {
     }
 
     setUpRequiredVariables() {
-        return new Promise<void>((resolve, reject) => {
-            this.getConfigData();
+        return new Promise<void>((resolve) => {
+            this._dynamicsRequest._data = Mapper.getConfigData(this._configFileLocation);
+            this._data = this._dynamicsRequest._data;
             if(this._data === null) { return; }
             Helpers.determinePrefix(this._data).then((prefix) => {
                 this._dynamicsRequest._prefix = prefix;
@@ -77,24 +80,5 @@ export class WebResourceDownloader {
                 resolve();
             });
         });
-    }
-
-    getConfigData() {
-        var windowsSystemRegex = /(\/[A-Za-z]:\/\w+)/g;
-        let match = this._configFileLocation.match(windowsSystemRegex);
-        let configPath;
-        if(match !== null) {
-            configPath = this._configFileLocation.substring(1, this._configFileLocation.length);
-        }
-        else {
-            configPath = this._configFileLocation;
-        }
-        if(fs.existsSync(configPath)){
-            this._dynamicsRequest._data = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-            this._data = JSON.parse(fs.readFileSync(configPath, "utf-8"));
-        }
-        else {
-            vscode.window.showErrorMessage(`No dynamicsConfig.json file was found. Please add one in ${this._rootPath}`);
-        }
     }
 }
