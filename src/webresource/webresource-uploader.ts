@@ -24,17 +24,13 @@ export class WebResourceUploader {
     }
 
     setUpRequiredVariables() {
-        return new Promise<void>((resolve, reject) => {
+        return new Promise<void>(async (resolve) => {
             this.getConfigData();
             if(this._data === null) { return; }
-            this.getWebResourceFolder().then((webResourceFolder) => {
-                this._webResourceFolder = webResourceFolder;
-                Helpers.determinePrefix(this._data).then((prefix) => {
-                    this._dynamicsRequest._prefix = prefix;
-                    this._prefix = prefix;
-                    resolve();
-                });
-            });
+            this._webResourceFolder = await this.getWebResourceFolder();
+            this._prefix = await Helpers.determinePrefix(this._data);
+            this._dynamicsRequest._prefix = this._prefix;
+            resolve();
         });
     }
 
@@ -61,22 +57,20 @@ export class WebResourceUploader {
         });
     }
 
-    uploadWebResource() {
+    async uploadWebResource() {
 		try {
-            this.setUpRequiredVariables().then(() => {
-                this.readWebResources().then(() => {
-                    this._fullPath = this._rootPath + this._webResourceFolder;
-                    this.uploadWebResources();
-                });
-            });
+            await this.setUpRequiredVariables();
+            await this.readWebResources();
+            this._fullPath = this._rootPath + this._webResourceFolder;
+            this.uploadWebResources();    
 		} catch (err){
 			vscode.window.showErrorMessage(`There was an error uploading your web resource. Make sure you have a dynamicsConfig.json file in your root workspace folder. Reason: ${err}`);
 			console.log(err);
 		}
     }
 
-    getWebResourceFolder() : Promise<string> {
-        return new Promise<string>((resolve, reject) => {
+    async getWebResourceFolder() : Promise<string> {
+        return new Promise<string>((resolve) => {
             let folderOptions = this._data.NamingConvention.WebResourceFolder;
             if (folderOptions.length > 1){
                 this.getWebResourceLocation(folderOptions).then(folder => { resolve(folder); });
@@ -84,7 +78,6 @@ export class WebResourceUploader {
                 resolve(folderOptions);
             }
         });
-		
     }
 
     getWebResourceLocation(folderOptions: any) : Promise<string> {
@@ -98,7 +91,7 @@ export class WebResourceUploader {
     }
 
     readWebResources() : Promise<void>{ 
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             let webResources = fs.readdirSync(this._rootPath + this._webResourceFolder);
             vscode.window.showQuickPick(webResources).then(selectedFile => {
                 if(!selectedFile){ return; }
@@ -135,26 +128,22 @@ export class WebResourceUploader {
 		}
 	}
 
-    uploadFile(isNew: boolean, existingFile?: any) {
+    async uploadFile(isNew: boolean, existingFile?: any) {
 		let fileContent: string;
 		fileContent = fs.readFileSync(`${this._fullPath}/${this._selectedFile}`, {encoding: 'base64'});
 		if(isNew){
-			this.chooseWebResourceType().then(webResourceType => {
-                this._dynamicsRequest.uploadNewWebResource(webResourceType, fileContent).then((match) => {
-                    this._dynamicsRequest.publishWebResource(match).then(webresourceId => {
-                        this._dynamicsRequest.addToSolution().then(solutions => {
-                            this._dynamicsRequest.selectSolutionToAdd(solutions, webresourceId);
-                        });
-                    });
-                });
-            });
+			let webResourceType = await this.chooseWebResourceType();
+            let match = await this._dynamicsRequest.uploadNewWebResource(webResourceType, fileContent);
+            let webResourceId = await this._dynamicsRequest.publishWebResource(match);
+            let solutions = await this._dynamicsRequest.addToSolution();
+            this._dynamicsRequest.selectSolutionToAdd(solutions, webResourceId);
 		}
 		else {
-			this._dynamicsRequest.updateExistingWebResource(existingFile, fileContent).then(() => {
+			this._dynamicsRequest.updateExistingWebResource(existingFile, fileContent).then(async () => {
                 if(this._data.UploadOptions.AddExistingToSolution === true){
                     this.askToAddToSolution(existingFile);
                 }
-                this._dynamicsRequest.publishWebResource(existingFile.webresourceid);
+                await this._dynamicsRequest.publishWebResource(existingFile.webresourceid);
             });
 		}
 	}
