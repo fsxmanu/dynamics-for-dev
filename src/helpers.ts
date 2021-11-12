@@ -3,7 +3,7 @@ import * as vscode from "vscode";
 export class Helpers {
 
     static determinePrefix(data: any) : Promise<string> {
-        return new Promise<string>((resolve, reject) =>
+        return new Promise<string>((resolve) =>
         {
             let prefixOptions = data.NamingConvention.Prefix;
             if(prefixOptions.length > 1){
