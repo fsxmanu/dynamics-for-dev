@@ -98,7 +98,7 @@ export class DynamicsRequests {
 
     selectSolutionToAdd(solutions: any, fileId: any) {
         vscode.window.showQuickPick(solutions, {canPickMany: false, title: "Select Solution to add the Web Resource to."}).then(selected => {
-            if(!selected){ return; }
+            if(!selected || selected === ""){ return; }
             this.addComponentToSolution(fileId, selected);		
         })
         .then(undefined, err => { 
@@ -151,7 +151,7 @@ export class DynamicsRequests {
 	}
 
     getWebResource(filter: string) : Promise<any> {
-        return new Promise<any>((resolve, reject) => {
+        return new Promise<any>((resolve) => {
             let xmlHttpRequest = require('xhr2');
             let req = new xmlHttpRequest();
             req.open("GET", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/webresourceset?\$select=content,contentjson,displayname,name,webresourceid&\$${filter}`);
@@ -167,7 +167,6 @@ export class DynamicsRequests {
     }
 
     async publishWebResource(webresourceid: any) : Promise<string> {
-        
 		return new Promise(async (resolve, reject) => {
 			/* eslint-disable */
 			var parameters = {
