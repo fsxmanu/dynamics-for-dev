@@ -3,6 +3,7 @@ import { DefaultAzureCredential } from "@azure/identity";
 import * as fs from 'fs';
 import { DynamicsRequests } from "../connection/dynamics-requests";
 import { Helpers } from "../helpers";
+import { Mapper } from "../mapping/mapping-file-provider";
 
 export class SolutionExporter {
     _webResourceFolder: string = "";
@@ -15,7 +16,7 @@ export class SolutionExporter {
     _dynamicsRequest : DynamicsRequests;
 
     constructor(workSpaceRootPath: string) {
-        this._rootPath = workSpaceRootPath;
+        this._rootPath = Mapper.fixPath(workSpaceRootPath);
         this._connection = new DefaultAzureCredential();
         this._configFileLocation = this._rootPath + '/dynamicsConfig.json';
         this._dynamicsRequest = new DynamicsRequests(this._connection);
@@ -40,9 +41,9 @@ export class SolutionExporter {
     }
 
     async exportSolutionContext(folder: any){
-        this._fullPath = folder.path;
+        this._fullPath = Mapper.fixPath(folder.path);
         await this.setUpRequiredVariables();
-        if(this._data.Solutions === undefined) {
+        if(this._data.Solutions === undefined || this._data.Solutions.length === 0) {
             this.getSolutionFromDynamics("select=uniquename&\$filter=ismanaged eq false").then(solutions => {
                 vscode.window.showQuickPick(solutions).then((solutionName) => {
                     this.getSolutionFromDynamics(`filter=uniquename eq '${solutionName}'`).then(solution => {
@@ -61,6 +62,7 @@ export class SolutionExporter {
     }
 
     exportSolution(solution: any) {
+        vscode.window.showInformationMessage("Exporting solution. Please wait...");
         if(solution.length === 0) { 
             vscode.window.showErrorMessage("No Solution found to export");
             return;
@@ -78,7 +80,7 @@ export class SolutionExporter {
                 let result = JSON.parse(req.response);
                 let fullFilePath = this._fullPath + "/" + solution[0] + ".zip";
                 fs.writeFileSync(fullFilePath, result.ExportSolutionFile, { encoding: "base64" });
-                console.log("success");
+                vscode.window.showInformationMessage("Solution exported successfully");
             }, false);
             req.send(JSON.stringify(parameters));
         });
