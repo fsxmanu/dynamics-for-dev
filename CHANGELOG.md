@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.7.2 - Fixed file path compatibility with Windows
+
+Added a fix in which the extension couldn't use the file paths of Windows
+
 ### 0.7.1 - Added Changelog
 
 Added this changelog with history of previous releases

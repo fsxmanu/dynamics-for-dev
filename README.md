@@ -94,6 +94,10 @@ Errorhandling isn't aways giving feedback to the user. Will be corrected. If you
 
 ## Release Notes
 
+### 0.7.2 - Fixed file path compatibility with Windows
+
+Added a fix in which the extension couldn't use the file paths of Windows
+
 ### 0.7.0 - Added Export Solution functionality
 
 Added context menu to export dynamics solution
