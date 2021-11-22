@@ -2,7 +2,7 @@
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
 import { WebResourceUploader } from './webresource/webresource-uploader';
-import { createTemplateFile } from './mapping/mapping-file-provider';
+import { Mapper } from './mapping/mapping-file-provider';
 import { WebResourceDownloader } from './webresource/webresource-downloader';
 import { SolutionExporter } from './solution/solution-exporter';
 
@@ -22,7 +22,7 @@ export function activate(context: vscode.ExtensionContext) {
 	context.subscriptions.push(uploadCommand);
 
 	let addJsonTemplateCommand = vscode.commands.registerCommand('dynamics-for-dev.addDynamicsConfig', () => {
-		createTemplateFile();
+		new Mapper().createTemplateFile();
 	});
 	context.subscriptions.push(addJsonTemplateCommand);
 

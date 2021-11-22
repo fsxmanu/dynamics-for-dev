@@ -3,6 +3,7 @@ import { DefaultAzureCredential } from "@azure/identity";
 import * as fs from 'fs';
 import { DynamicsRequests } from "../connection/dynamics-requests";
 import { Helpers } from "../helpers";
+import { Mapper } from "../mapping/mapping-file-provider";
 
 export class SolutionExporter {
     _webResourceFolder: string = "";
@@ -15,7 +16,7 @@ export class SolutionExporter {
     _dynamicsRequest : DynamicsRequests;
 
     constructor(workSpaceRootPath: string) {
-        this._rootPath = workSpaceRootPath;
+        this._rootPath = Mapper.fixPath(workSpaceRootPath);
         this._connection = new DefaultAzureCredential();
         this._configFileLocation = this._rootPath + '/dynamicsConfig.json';
         this._dynamicsRequest = new DynamicsRequests(this._connection);
@@ -40,7 +41,7 @@ export class SolutionExporter {
     }
 
     async exportSolutionContext(folder: any){
-        this._fullPath = folder.path;
+        this._fullPath = Mapper.fixPath(folder.path);
         await this.setUpRequiredVariables();
         if(this._data.Solutions === undefined) {
             let solutions = await this.getSolutionFromDynamics("select=uniquename&\$filter=ismanaged eq false");
@@ -78,7 +79,7 @@ export class SolutionExporter {
                 let result = JSON.parse(req.response);
                 let fullFilePath = this._fullPath + "/" + solution[0] + ".zip";
                 fs.writeFileSync(fullFilePath, result.ExportSolutionFile, { encoding: "base64" });
-                vscode.window.showInformationMessage("Solution export successfully");
+                vscode.window.showInformationMessage("Solution exported successfully");
             }, false);
             req.send(JSON.stringify(parameters));
         });

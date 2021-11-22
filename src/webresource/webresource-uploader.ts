@@ -3,6 +3,7 @@ import { DefaultAzureCredential } from "@azure/identity";
 import * as fs from 'fs';
 import { DynamicsRequests } from "../connection/dynamics-requests";
 import { Helpers } from "../helpers";
+import { Mapper } from "../mapping/mapping-file-provider";
 
 export class WebResourceUploader {
 
@@ -24,8 +25,9 @@ export class WebResourceUploader {
     }
 
     setUpRequiredVariables() {
-        return new Promise<void>(async (resolve) => {
-            this.getConfigData();
+        return new Promise<void>(async (resolve, reject) => {
+            this._dynamicsRequest._data = Mapper.getConfigData(this._configFileLocation);
+            this._data = this._dynamicsRequest._data;
             if(this._data === null) { return; }
             this._webResourceFolder = await this.getWebResourceFolder();
             this._prefix = await Helpers.determinePrefix(this._data);
@@ -34,27 +36,13 @@ export class WebResourceUploader {
         });
     }
 
-    getConfigData() {
-        if(fs.existsSync(this._configFileLocation)){
-            this._dynamicsRequest._data = JSON.parse(fs.readFileSync(this._configFileLocation, "utf-8"));
-            this._data = JSON.parse(fs.readFileSync(this._configFileLocation, "utf-8"));
-        }
-        else {
-            vscode.window.showErrorMessage(`No dynamicsConfig.json file was found. Please add one in ${this._rootPath}`);
-        }
-    }
-
-    uploadWebResourceContext(file: any) {
+    async uploadWebResourceContext(file: any) {
+        await this.setUpRequiredVariables();
         this._selectedFile = file.path.replace(/^.*[\\\/]/, '');
         this._dynamicsRequest._selectedFile = this._selectedFile;
         this._fullPath = file.path.substring(0, file.path.lastIndexOf("/"));
-        this.getConfigData();
         if(this._data === null) { return; }
-        Helpers.determinePrefix(this._data).then((prefix) => {
-            this._dynamicsRequest._prefix = prefix;
-            this._prefix = prefix;
-            this.uploadWebResources();
-        });
+        this.uploadWebResources();
     }
 
     async uploadWebResource() {
@@ -130,7 +118,8 @@ export class WebResourceUploader {
 
     async uploadFile(isNew: boolean, existingFile?: any) {
 		let fileContent: string;
-		fileContent = fs.readFileSync(`${this._fullPath}/${this._selectedFile}`, {encoding: 'base64'});
+        let fullPath = Mapper.fixPath(this._fullPath);
+		fileContent = fs.readFileSync(`${fullPath}/${this._selectedFile}`, {encoding: 'base64'});
 		if(isNew){
 			let webResourceType = await this.chooseWebResourceType();
             let match = await this._dynamicsRequest.uploadNewWebResource(webResourceType, fileContent);

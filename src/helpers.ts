@@ -11,7 +11,7 @@ export class Helpers {
                 resolve(prefix);
                 });
             }else {
-                return new Promise((resolve) =>  resolve(data.NamingConvention.Prefix));
+                resolve(data.NamingConvention.Prefix);
             }
         });
     }
