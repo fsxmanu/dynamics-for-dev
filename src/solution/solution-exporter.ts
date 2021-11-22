@@ -43,7 +43,7 @@ export class SolutionExporter {
     async exportSolutionContext(folder: any){
         this._fullPath = Mapper.fixPath(folder.path);
         await this.setUpRequiredVariables();
-        if(this._data.Solutions === undefined) {
+        if(this._data.Solutions === undefined || this._data.Solutions.length === 0) {
             let solutions = await this.getSolutionFromDynamics("select=uniquename&\$filter=ismanaged eq false");
             vscode.window.showQuickPick(solutions).then(async (solutionName) => {
                 if(!solutionName || solutionName === "") { return; }

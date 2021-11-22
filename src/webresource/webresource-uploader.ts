@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import { DynamicsRequests } from "../connection/dynamics-requests";
 import { Helpers } from "../helpers";
 import { Mapper } from "../mapping/mapping-file-provider";
+import { Notification } from "../vscode-notifications/notification-helper";
 
 export class WebResourceUploader {
 
@@ -99,19 +100,18 @@ export class WebResourceUploader {
         });
     }
     
-    uploadWebResources() {
+    async uploadWebResources() {
 		try{
             var filter = `filter=name eq '${this._prefix}${this._selectedFile}'`;
-            this._dynamicsRequest.getWebResource(filter).then((webResource) => {
-                if(webResource.value.length === 0) {
-                    this.askToCreate();
-                }
-                else {
-                    this.uploadFile(false, webResource.value[0]);
-                }
-            });
+            let webResources = await this._dynamicsRequest.getWebResource(filter);
+            if(webResources.value.length === 0) {
+                this.askToCreate();
+            }
+            else {
+                this.uploadFile(false, webResources.value[0]);
+            }
 		} catch (err) {
-			vscode.window.showErrorMessage(`There was an error getting the web resources. Reason: ${err}`);
+			Notification.showError(`There was an error getting the web resources. Reason: ${err}`);
 			console.log(err);
 		}
 	}
@@ -130,7 +130,7 @@ export class WebResourceUploader {
 		else {
 			this._dynamicsRequest.updateExistingWebResource(existingFile, fileContent).then(async () => {
                 if(this._data.UploadOptions.AddExistingToSolution === true){
-                    this.askToAddToSolution(existingFile);
+                    await this.askToAddToSolution(existingFile);
                 }
                 await this._dynamicsRequest.publishWebResource(existingFile.webresourceid);
             });
@@ -164,17 +164,16 @@ export class WebResourceUploader {
         });
     }
 
-    askToAddToSolution(existingFile: any) {
-        vscode.window.showQuickPick(["Yes", "No"], { canPickMany: false, title: "Do you want to add the WebResource to a Solution?" }).then(selected => {
-            if (!selected) { return; }
-            if (selected === "Yes") {
-                this._dynamicsRequest.addToSolution().then(solutions => {
-                    this._dynamicsRequest.selectSolutionToAdd(solutions, existingFile.webresourceid);
-                });
+    async askToAddToSolution(existingFile: any) {
+        return new Promise<void>(async (resolve, reject) => {
+            let decision = await Notification.showPick(["Yes", "No"], "Do you want to add the WebResource to a Solution?");
+            if(decision === null) { Notification.showError("There was an error while deciding if component should be added to solution."); }
+            
+            if (decision === "Yes") {
+                let solutions = await this._dynamicsRequest.addToSolution();
+                this._dynamicsRequest.selectSolutionToAdd(solutions, existingFile.webresourceid);
             }
-        }).then(undefined, err => { 
-			vscode.window.showErrorMessage("Couldn't add the WebResource to solution.");
-			console.error(err);	
-		});
+            resolve();
+        });
     }
 }
