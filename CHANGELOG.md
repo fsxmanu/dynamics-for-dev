@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.7.3 - General cleanup and global error handling
+
+Added global error handling so you should always get a message in case an exception occurs.
+
 ### 0.7.2 - Fixed file path compatibility with Windows
 
 Added a fix in which the extension couldn't use the file paths of Windows
