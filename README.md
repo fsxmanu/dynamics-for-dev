@@ -90,9 +90,15 @@ If you do not include this option in your json the extension will get every unma
 
 ## Known Issues
 
+You need to install Azure CLI in case you haven't. You need to restart after the installation.
+
 Errorhandling isn't aways giving feedback to the user. Will be corrected. If you experience an error please create an issue on the github page or message the author.
 
 ## Release Notes
+
+### 0.7.3 - General cleanup and global error handling
+
+Added global error handling so you should always get a message in case an exception occurs.
 
 ### 0.7.2 - Fixed file path compatibility with Windows
 
