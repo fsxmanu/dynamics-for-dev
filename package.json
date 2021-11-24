@@ -60,7 +60,7 @@
         {
           "command": "dynamics-for-dev.uploadWebResourceContext",
           "group": "1_modification",
-          "when": "resourceExtname == .js || .html || .css || .xml || .png || .jpg || .jpeg || .gif || .svg || .xap || .xsl || .ico || .resx"
+          "when": "resourceExtname == .js || resourceExtname == .html || resourceExtname == .css || resourceExtname == .xml || resourceExtname == .png || resourceExtname == .jpg || resourceExtname == .jpeg || resourceExtname == .gif || resourceExtname == .svg || resourceExtname == .xap || resourceExtname == .xsl || resourceExtname == .ico || resourceExtname == .resx"
         },
         {
           "command": "dynamics-for-dev.downloadWebResourceContext",
