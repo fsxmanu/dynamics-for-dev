@@ -18,21 +18,53 @@ export function activate(context: vscode.ExtensionContext) {
 	}
 	let basePath = workSpaceFolder[0].uri.path;
 
-	let uploadCommand = vscode.commands.registerCommand('dynamics-for-dev.uploadWebResource', () => new WebResourceUploader(basePath).uploadWebResource());
+	let uploadCommand = vscode.commands.registerCommand('dynamics-for-dev.uploadWebResource', () => {
+		try {
+			new WebResourceUploader(basePath).uploadWebResource();
+		}
+		catch(err){
+			vscode.window.showErrorMessage(`There was an error uploading the webresource. Reason: ${err}`);
+		}
+	});
 	context.subscriptions.push(uploadCommand);
 
 	let addJsonTemplateCommand = vscode.commands.registerCommand('dynamics-for-dev.addDynamicsConfig', () => {
-		new Mapper().createTemplateFile();
+		try {
+			new Mapper().createTemplateFile();
+		}
+		catch (err) {
+			vscode.window.showErrorMessage(`There was an error creationg the file. Reason: ${err}`);
+		}
 	});
 	context.subscriptions.push(addJsonTemplateCommand);
 
-	let uploadContextCommand = vscode.commands.registerCommand('dynamics-for-dev.uploadWebResourceContext', (file) => new WebResourceUploader(basePath).uploadWebResourceContext(file));
+	let uploadContextCommand = vscode.commands.registerCommand('dynamics-for-dev.uploadWebResourceContext', (file) => {
+		try {
+			new WebResourceUploader(basePath).uploadWebResourceContext(file);
+		}
+		catch (err) {
+			vscode.window.showErrorMessage(`There was an error uploading the web resource. Reason: ${err}`);
+		}
+		
+	});
 	context.subscriptions.push(uploadContextCommand);
 
-	let downloadContextCommand = vscode.commands.registerCommand('dynamics-for-dev.downloadWebResourceContext', (folder) => new WebResourceDownloader(basePath).downloadWebResourceContext(folder));
+	let downloadContextCommand = vscode.commands.registerCommand('dynamics-for-dev.downloadWebResourceContext', (folder) => {
+		try {
+			new WebResourceDownloader(basePath).downloadWebResourceContext(folder);
+		} catch (err) {
+			vscode.window.showErrorMessage(`There was an error downloading the webresource. Reason: ${err}`);
+		}
+	});
 	context.subscriptions.push(downloadContextCommand);
 
-	let exportSolution = vscode.commands.registerCommand('dynamics-for-dev.exportSolutionContext', (folder) => new SolutionExporter(basePath).exportSolutionContext(folder));
+	let exportSolution = vscode.commands.registerCommand('dynamics-for-dev.exportSolutionContext', (folder) => {
+		try {
+			new SolutionExporter(basePath).exportSolutionContext(folder);
+		} catch (err) {
+			vscode.window.showErrorMessage(`There was an error exporting the solution. Reason: ${err}`);
+		}
+	});
 	context.subscriptions.push(exportSolution);
 }
 
