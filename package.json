@@ -3,7 +3,7 @@
   "displayName": "Dynamics For Dev",
   "publisher": "MSteiner",
   "description": "An extension that supports you while developing for Dynamics 365/PowerPlatform/CRM",
-  "version": "0.7.2",
+  "version": "0.7.3",
   "engines": {
     "vscode": "^1.61.0"
   },
@@ -60,7 +60,7 @@
         {
           "command": "dynamics-for-dev.uploadWebResourceContext",
           "group": "1_modification",
-          "when": "resourceExtname == .js || .html || .css || .xml || .png || .jpg || .jpeg || .gif || .svg || .xap || .xsl || .ico || .resx"
+          "when": "resourceExtname == .js || resourceExtname == .html || resourceExtname == .css || resourceExtname == .xml || resourceExtname == .png || resourceExtname == .jpg || resourceExtname == .jpeg || resourceExtname == .gif || resourceExtname == .svg || resourceExtname == .xap || resourceExtname == .xsl || resourceExtname == .ico || resourceExtname == .resx"
         },
         {
           "command": "dynamics-for-dev.downloadWebResourceContext",

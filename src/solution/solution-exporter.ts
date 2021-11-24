@@ -44,12 +44,11 @@ export class SolutionExporter {
         this._fullPath = Mapper.fixPath(folder.path);
         await this.setUpRequiredVariables();
         if(this._data.Solutions === undefined || this._data.Solutions.length === 0) {
-            this.getSolutionFromDynamics("select=uniquename&\$filter=ismanaged eq false").then(solutions => {
-                vscode.window.showQuickPick(solutions).then((solutionName) => {
-                    this.getSolutionFromDynamics(`filter=uniquename eq '${solutionName}'`).then(solution => {
-                        this.exportSolution(solution);
-                    });
-                });
+            let solutions = await this.getSolutionFromDynamics("select=uniquename&\$filter=ismanaged eq false");
+            vscode.window.showQuickPick(solutions).then(async (solutionName) => {
+                if(!solutionName || solutionName === "") { return; }
+                let solution = await this.getSolutionFromDynamics(`filter=uniquename eq '${solutionName}'`);
+                this.exportSolution(solution);
             });
         }
         else {

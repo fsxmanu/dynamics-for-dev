@@ -4,6 +4,7 @@ import * as fs from 'fs';
 import { DynamicsRequests } from "../connection/dynamics-requests";
 import { Helpers } from "../helpers";
 import { Mapper } from "../mapping/mapping-file-provider";
+import { Notification } from "../vscode-notifications/notification-helper";
 
 export interface WebResourceRecord {
     [key: string]: string;
@@ -28,30 +29,27 @@ export class WebResourceDownloader {
         this._dynamicsRequest = new DynamicsRequests(this._connection);
     }
 
-    downloadWebResourceContext(folder: any) {
+    async downloadWebResourceContext(folder: any) {
         this._fullPath = Mapper.fixPath(folder.path);
         this._webResourceFolder = this._fullPath;
         this._dynamicsRequest._data = Mapper.getConfigData(this._configFileLocation);
         this._data = this._dynamicsRequest._data;
-        if(this._data === null) { return; }
-        Helpers.determinePrefix(this._data).then((prefix) => {
-            this._prefix = prefix;
-            let filter = `filter=startswith(name,'${this._prefix}')`;
-            this._dynamicsRequest.getWebResource(filter).then((webResources) => {
-                if(webResources.value.length === 0) {
-                    vscode.window.showErrorMessage("No webresources found.");
-                }
-                else {
-                    let options = webResources.value.map((w: any) => w.name);
-                    let records: WebResourceRecord = {};
-                    
-                    webResources.value.forEach((w: any) => {
-                        records[w.name] = w.content;
-                    });
-                    this.selectResource(options, records);
-                }
+        if(this._data === null) { Notification.showError("No dynamicsConfig.json found or it's corrupt"); }
+        
+        this._prefix = await Helpers.determinePrefix(this._data);
+        let webResources = await this._dynamicsRequest.getWebResource( `filter=startswith(name,'${this._prefix}')`);
+        if(webResources.value.length === 0) {
+            Notification.showError("No webresources found.");
+        }
+        else {
+            let options = webResources.value.map((w: any) => w.name);
+            let records: WebResourceRecord = {};
+            
+            webResources.value.forEach((w: any) => {
+                records[w.name] = w.content;
             });
-        });
+            this.selectResource(options, records);
+        }
     }
 
     selectResource(options: any, records: any) {
