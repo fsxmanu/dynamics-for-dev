@@ -47,9 +47,12 @@ export class Mapper {
         }
     }
     
-    static createNewTemplate(filePath: any){
+    static async createNewTemplate(filePath: any){
         const writeData = Buffer.from(Mapper.returnUploadConfig(), 'utf8');
-        vscode.workspace.fs.writeFile(filePath, writeData);
+        await vscode.workspace.fs.writeFile(filePath, writeData);
+        vscode.workspace.openTextDocument(filePath).then(doc => {
+            vscode.window.showTextDocument(doc);
+          });
         vscode.window.showInformationMessage('Created a new dynamicsConfig.json');
     }
     
