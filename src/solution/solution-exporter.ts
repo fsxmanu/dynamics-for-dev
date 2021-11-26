@@ -71,6 +71,7 @@ export class SolutionExporter {
                 title: "Exporting solution. Please wait..."
             }, async () => {
                 await this.export(solution);
+                vscode.window.showInformationMessage("Solution exported successfully");
                 resolve();
             });
         });
@@ -91,7 +92,6 @@ export class SolutionExporter {
                     let result = JSON.parse(req.response);
                     let fullFilePath = this._fullPath + "/" + solution[0] + ".zip";
                     fs.writeFileSync(fullFilePath, result.ExportSolutionFile, { encoding: "base64" });
-                    vscode.window.showInformationMessage("Solution exported successfully");
                     resolve();
                 }, false);
                 req.send(JSON.stringify(parameters));
