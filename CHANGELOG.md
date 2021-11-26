@@ -1,5 +1,11 @@
 # Change Log
 
+### 0.7.4 - New Progress Indicator
+
+Changed the progress notification window to show the progress.
+
+Extension now opens dynamicsConfig.json file when it was created.
+
 ### 0.7.3 - General cleanup and global error handling
 
 Added global error handling so you should always get a message in case an exception occurs.
