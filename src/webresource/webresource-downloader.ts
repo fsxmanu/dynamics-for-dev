@@ -30,6 +30,7 @@ export class WebResourceDownloader {
     }
 
     async downloadWebResourceContext(folder: any) {
+        
         this._fullPath = Mapper.fixPath(folder.path);
         this._webResourceFolder = this._fullPath;
         this._dynamicsRequest._data = Mapper.getConfigData(this._configFileLocation);
@@ -37,7 +38,7 @@ export class WebResourceDownloader {
         if(this._data === null) { Notification.showError("No dynamicsConfig.json found or it's corrupt"); }
         
         this._prefix = await Helpers.determinePrefix(this._data);
-        let webResources = await this._dynamicsRequest.getWebResource( `filter=startswith(name,'${this._prefix}')`);
+        let webResources = await this._dynamicsRequest.getWebResource(`filter=startswith(name,'${this._prefix}')`, "Getting Webresources...");
         if(webResources.value.length === 0) {
             Notification.showError("No webresources found.");
         }

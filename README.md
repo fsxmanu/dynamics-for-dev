@@ -12,7 +12,12 @@ Dynamics-For-Dev makes developing for Dynamics easier without leaving your codin
 ## Requirements
 
 To connect to dynamics you need to sign in to azure with the Azure Account (identifier: ms-vscode.azure-account) extension. It should have been installed with this extension.
+
+Also you need to have installed the Azure CLI tools from the official Microsoft documentation.
+
 To check just search for `Azure: Sign In` in your Command Palette and sign in.
+
+I recommend to use the command `az login --allow-no-subscription` in the terminal to log in. If the wrong browser window/profile opens for you just copy the url to the correct browser.
 
 ## Use it
 
@@ -92,9 +97,18 @@ If you do not include this option in your json the extension will get every unma
 
 You need to install Azure CLI in case you haven't. You need to restart after the installation.
 
+If there is a authentication issue I recommend you to use `az login --allow-no-subscription` in the terminal to log you in.
+If the wrong browser window/profile opens for you just copy the url to the correct browser.
+
 Errorhandling isn't aways giving feedback to the user. Will be corrected. If you experience an error please create an issue on the github page or message the author.
 
 ## Release Notes
+
+### 0.7.4 - New Progress Indicator
+
+Changed the progress notification window to show the progress.
+
+Extension now opens dynamicsConfig.json file when it was created.
 
 ### 0.7.3 - General cleanup and global error handling
 

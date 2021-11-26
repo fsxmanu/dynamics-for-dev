@@ -73,6 +73,19 @@ export class DynamicsRequests {
 
 	updateExistingWebResource(existingFile: any, fileContent: any) {
         return new Promise<void>((resolve, reject) => {
+            vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                cancellable: false,
+                title: 'Updating webresource...'
+            }, async () => {
+                await this.updateWebResource(existingFile, fileContent);
+                resolve();
+            });
+        });
+	}
+
+    async updateWebResource(existingFile: any, fileContent: any) : Promise<void> {
+        return new Promise<void>((resolve, reject) => {
             var entity = { "content": fileContent };
             try {
                 let xmlHttpRequest = require('xhr2');
@@ -81,10 +94,9 @@ export class DynamicsRequests {
                 req = this.setRequestHeaders(req, "application/json; charset=utf-8").then(response => {
                     req = response;
                     req.addEventListener("load", function() {
-                        Notification.showInfo("Resource was uploaded to CRM successfully.");
                         resolve();
                     }, false);
-                    Notification.showInfo("Updating webresource...");
+                    //Notification.showInfo("Updating webresource...");
                     req.send(JSON.stringify(entity));
                 });
             } catch (err) {	
@@ -93,7 +105,7 @@ export class DynamicsRequests {
                 reject(err);
             }
         });
-	}
+    }
 
     async selectSolutionToAdd(solutions: any, fileId: any) {
         let solution = await Notification.showPick(solutions, "Select Solution to add the Web Resource to.");
@@ -101,7 +113,7 @@ export class DynamicsRequests {
         this.addComponentToSolution(fileId, solution);		
     }
 
-    async addToSolution() : Promise<any> {
+    async getSolutions() : Promise<any> {
         return new Promise<any>(async (resolve) => {
             var xmlHttpRequest = require('xhr2');
 		    var req = new xmlHttpRequest();
@@ -121,8 +133,22 @@ export class DynamicsRequests {
         });
 	}
 
-    async addComponentToSolution(crmId: any, selectedSolution: string) {
-		let body = Helpers.createAddToSolutionRequestBody(crmId, selectedSolution);
+    async addComponentToSolution(crmId: any, selectedSolution: string) : Promise<void> {
+		return new Promise<void>((resolve, reject) => {
+            vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                cancellable: false,
+                title: 'Adding to Solution...'
+            }, async () => {
+                await this.addComponent(crmId, selectedSolution);
+                Notification.showInfo("Added to Solution successfully");
+                resolve();
+            });
+        });
+	}
+
+    async addComponent(crmId: any, selectedSolution: string) {
+        let body = Helpers.createAddToSolutionRequestBody(crmId, selectedSolution);
 		var xmlHttpRequest = require('xhr2');
 		var req = new xmlHttpRequest();
 
@@ -133,13 +159,26 @@ export class DynamicsRequests {
                 Notification.showInfo("Component was added to solution successfully.");
             }
             else {
-                Notification.showError("There was an error while adding component to solution.");
+                Notification.showError(`There was an error while adding component to solution. Reason: ${req.statusText}`);
             }
         }, false);
         req.send(body);
-	}
+    }
 
-    async getWebResource(filter: string) : Promise<any> {
+    async getWebResource(filter: string, progressMessage: string) : Promise<any> {
+        return new Promise<string>((resolve, reject) => {
+            vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                cancellable: false,
+                title: progressMessage
+            }, async () => {
+                let webResources = await this.getWebResourceRecords(filter);
+                resolve(webResources);
+            });
+        });
+    }
+
+    async getWebResourceRecords(filter: string): Promise<any> {
         return new Promise<any>(async (resolve) => {
             let xmlHttpRequest = require('xhr2');
             let req = new xmlHttpRequest();
@@ -154,6 +193,21 @@ export class DynamicsRequests {
     }
 
     async publishWebResource(webresourceid: any) : Promise<string> {
+        return new Promise<string>((resolve, reject) => {
+            vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                cancellable: false,
+                title: 'Publishing component...'
+            }, async () => {
+                let webResourceId = await this.publishComponent(webresourceid);
+                Notification.showInfo("Published successfully");
+                resolve(webResourceId);
+            });
+        });
+	}
+
+    async publishComponent(webresourceid: any) : Promise<string> {
+
 		return new Promise(async (resolve, reject) => {
 			/* eslint-disable */
 			var parameters = {
@@ -170,7 +224,6 @@ export class DynamicsRequests {
 		    req = await this.setRequestHeaders(req, "application/json; charset=utf-8");
 			req.addEventListener("load", function() {
 				if(req.status === 200 || req.status === 204){
-					vscode.window.showInformationMessage("Component was published successfully.");
 					resolve(webresourceid);
 				}
 				else {
@@ -178,8 +231,7 @@ export class DynamicsRequests {
 					reject(req.status);
 				}
 			}, false);
-			vscode.window.showInformationMessage("Component is publishing, please wait...");
 			req.send(JSON.stringify(parameters));
 		});
-	}
+    }
 }

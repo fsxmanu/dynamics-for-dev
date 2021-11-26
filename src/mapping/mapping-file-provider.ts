@@ -4,19 +4,19 @@ import * as fs from 'fs';
 export class Mapper {
     static returnUploadConfig() : string {
         let config = `{
-            "NamingConvention" : {
-                "WebResourceFolder" : [ "/JsFoler1/path", "/Jsfolder2/path" ],
-                "Prefix" : [ "new_/CustomJsFolder/", "new_" ]
-            },
-            "OrgInfo" : {
-                "CrmUrl" : "https://yourorganization.yourregion.dynamics.com",
-                "ApiVersion" : "9.1"
-            },
-            "UploadOptions" : {
-                "AddExistingToSolution" : false
-            },
-            "Solutions" : [ ]
-        }`;
+    "NamingConvention" : {
+        "WebResourceFolder" : [ "/JsFoler1/path", "/Jsfolder2/path" ],
+        "Prefix" : [ "new_/CustomJsFolder/", "new_" ]
+    },
+    "OrgInfo" : {
+        "CrmUrl" : "https://yourorganization.yourregion.dynamics.com",
+        "ApiVersion" : "9.1"
+    },
+    "UploadOptions" : {
+        "AddExistingToSolution" : false
+    },
+    "Solutions" : [ ]
+}`;
         return config;
     }
 
@@ -47,9 +47,12 @@ export class Mapper {
         }
     }
     
-    static createNewTemplate(filePath: any){
+    static async createNewTemplate(filePath: any){
         const writeData = Buffer.from(Mapper.returnUploadConfig(), 'utf8');
-        vscode.workspace.fs.writeFile(filePath, writeData);
+        await vscode.workspace.fs.writeFile(filePath, writeData);
+        vscode.workspace.openTextDocument(filePath).then(doc => {
+            vscode.window.showTextDocument(doc);
+          });
         vscode.window.showInformationMessage('Created a new dynamicsConfig.json');
     }
     
