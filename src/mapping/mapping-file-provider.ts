@@ -4,19 +4,19 @@ import * as fs from 'fs';
 export class Mapper {
     static returnUploadConfig() : string {
         let config = `{
-            "NamingConvention" : {
-                "WebResourceFolder" : [ "/JsFoler1/path", "/Jsfolder2/path" ],
-                "Prefix" : [ "new_/CustomJsFolder/", "new_" ]
-            },
-            "OrgInfo" : {
-                "CrmUrl" : "https://yourorganization.yourregion.dynamics.com",
-                "ApiVersion" : "9.1"
-            },
-            "UploadOptions" : {
-                "AddExistingToSolution" : false
-            },
-            "Solutions" : [ ]
-        }`;
+    "NamingConvention" : {
+        "WebResourceFolder" : [ "/JsFoler1/path", "/Jsfolder2/path" ],
+        "Prefix" : [ "new_/CustomJsFolder/", "new_" ]
+    },
+    "OrgInfo" : {
+        "CrmUrl" : "https://yourorganization.yourregion.dynamics.com",
+        "ApiVersion" : "9.1"
+    },
+    "UploadOptions" : {
+        "AddExistingToSolution" : false
+    },
+    "Solutions" : [ ]
+}`;
         return config;
     }
 

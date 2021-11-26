@@ -2,7 +2,6 @@ import * as vscode from "vscode";
 import { DefaultAzureCredential } from "@azure/identity";
 import * as fs from 'fs';
 import { DynamicsRequests } from "../connection/dynamics-requests";
-import { Helpers } from "../helpers";
 import { Mapper } from "../mapping/mapping-file-provider";
 
 export class SolutionExporter {
@@ -60,32 +59,60 @@ export class SolutionExporter {
         }
     }
 
-    exportSolution(solution: any) {
-        vscode.window.showInformationMessage("Exporting solution. Please wait...");
+    async exportSolution(solution: any) {
         if(solution.length === 0) { 
             vscode.window.showErrorMessage("No Solution found to export");
             return;
         }
-        let parameters : any = {};
-        parameters.SolutionName = solution[0];
-        parameters.Managed = false;
-
-        let xmlHttpRequest = require('xhr2');
-        let req = new xmlHttpRequest();
-        req.open("POST", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/ExportSolution`);
-        this._dynamicsRequest.setRequestHeaders(req, "application/json; charset=utf-8").then((response) => {
-            req = response;
-            req.addEventListener("load", () => {
-                let result = JSON.parse(req.response);
-                let fullFilePath = this._fullPath + "/" + solution[0] + ".zip";
-                fs.writeFileSync(fullFilePath, result.ExportSolutionFile, { encoding: "base64" });
-                vscode.window.showInformationMessage("Solution exported successfully");
-            }, false);
-            req.send(JSON.stringify(parameters));
+        return new Promise<void>((resolve, reject) => {
+            vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                cancellable: false,
+                title: "Exporting solution. Please wait..."
+            }, async () => {
+                await this.export(solution);
+                resolve();
+            });
         });
     }
 
-    getSolutionFromDynamics(filter: string) {
+    async export(solution: any) : Promise<void> {
+        return new Promise<void>((resolve, reject) => {
+            let parameters : any = {};
+            parameters.SolutionName = solution[0];
+            parameters.Managed = false;
+
+            let xmlHttpRequest = require('xhr2');
+            let req = new xmlHttpRequest();
+            req.open("POST", `${this._data.OrgInfo.CrmUrl}/api/data/v${this._data.OrgInfo.ApiVersion}/ExportSolution`);
+            this._dynamicsRequest.setRequestHeaders(req, "application/json; charset=utf-8").then((response) => {
+                req = response;
+                req.addEventListener("load", () => {
+                    let result = JSON.parse(req.response);
+                    let fullFilePath = this._fullPath + "/" + solution[0] + ".zip";
+                    fs.writeFileSync(fullFilePath, result.ExportSolutionFile, { encoding: "base64" });
+                    vscode.window.showInformationMessage("Solution exported successfully");
+                    resolve();
+                }, false);
+                req.send(JSON.stringify(parameters));
+            });
+        });
+    }
+
+    async getSolutionFromDynamics(filter: string) : Promise<any> {
+        return new Promise<string>((resolve, reject) => {
+            vscode.window.withProgress({
+                location: vscode.ProgressLocation.Notification,
+                cancellable: false,
+                title: "Getting Solutions..."
+            }, async () => {
+                let solutionRecords = await this.getSolutionRecords(filter);
+                resolve(solutionRecords);
+            });
+        });
+    }
+
+    async getSolutionRecords(filter: string) : Promise<any> {
         return new Promise<any>((resolve) => {
             let xmlHttpRequest = require('xhr2');
 		    let req = new xmlHttpRequest();

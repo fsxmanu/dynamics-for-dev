@@ -103,7 +103,7 @@ export class WebResourceUploader {
     async uploadWebResources() {
 		try{
             var filter = `filter=name eq '${this._prefix}${this._selectedFile}'`;
-            let webResources = await this._dynamicsRequest.getWebResource(filter);
+            let webResources = await this._dynamicsRequest.getWebResource(filter, "Getting Web Resources");
             if(webResources.value.length === 0) {
                 this.askToCreate();
             }
@@ -124,7 +124,7 @@ export class WebResourceUploader {
 			let webResourceType = await this.chooseWebResourceType();
             let match = await this._dynamicsRequest.uploadNewWebResource(webResourceType, fileContent);
             let webResourceId = await this._dynamicsRequest.publishWebResource(match);
-            let solutions = await this._dynamicsRequest.addToSolution();
+            let solutions = await this._dynamicsRequest.getSolutions();
             this._dynamicsRequest.selectSolutionToAdd(solutions, webResourceId);
 		}
 		else {
@@ -170,7 +170,7 @@ export class WebResourceUploader {
             if(decision === null) { Notification.showError("There was an error while deciding if component should be added to solution."); }
             
             if (decision === "Yes") {
-                let solutions = await this._dynamicsRequest.addToSolution();
+                let solutions = await this._dynamicsRequest.getSolutions();
                 this._dynamicsRequest.selectSolutionToAdd(solutions, existingFile.webresourceid);
             }
             resolve();
