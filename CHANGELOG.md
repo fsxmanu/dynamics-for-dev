@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.7.5 - Fixed vulnerability of follow-redirect package
+
+Updated npm packages to fix vulnerability of follow-redirect package.
+
 ### 0.7.4 - New Progress Indicator
 
 Changed the progress notification window to show the progress.
