@@ -17,6 +17,7 @@ export class WebResourceUploader {
     _configFileLocation: string;
     _fullPath : string = "";
     _dynamicsRequest : DynamicsRequests;
+    _file: any = null;
 
     constructor(workSpaceRootPath: string) {
         this._rootPath = workSpaceRootPath;
@@ -38,6 +39,7 @@ export class WebResourceUploader {
     }
 
     async uploadWebResourceContext(file: any) {
+        this._file = file;
         await this.setUpRequiredVariables();
         this._selectedFile = file.path.replace(/^.*[\\\/]/, '');
         this._dynamicsRequest._selectedFile = this._selectedFile;
@@ -62,7 +64,15 @@ export class WebResourceUploader {
         return new Promise<string>((resolve) => {
             let folderOptions = this._data.NamingConvention.WebResourceFolder;
             if (folderOptions.length > 1){
-                this.getWebResourceLocation(folderOptions).then(folder => { resolve(folder); });
+                if(this._data.UploadOptions.TryToResolveFilePath) {
+                    folderOptions.forEach((fO: any) => {
+                        if (this._file.path.includes(fO)) {
+                            resolve(fO);
+                            return;
+                        }
+                    });
+                }
+                this.getWebResourceLocation(this._data.NamingConvention.WebResourceFolder).then(folder => { resolve(folder); });
             } else {
                 resolve(folderOptions);
             }
