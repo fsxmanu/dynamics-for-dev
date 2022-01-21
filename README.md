@@ -68,7 +68,8 @@ If you do not include this option in your json the extension will get every unma
         "ApiVersion" : "9.1"
     },
     "UploadOptions" : {
-        "AddExistingToSolution" : false
+        "AddExistingToSolution" : false,
+        "TryToResolveFilePath" : false
     },
     "Solutions" : [ "MyCustomizationSolution", "MyPluginSolution" ]
 }
@@ -77,6 +78,8 @@ If you do not include this option in your json the extension will get every unma
 **UploadOptions**
 
 `AddExistingToSolution`: if you set this to true, it will ask you if you want to add the webresource to a solution even if it already exists. Otherwise it will just ask you if you create a new one. <br/>
+
+`TryToResolveFilePath`: if set to true, it will try to automatically detect the correct path option of your file you want to upload. Only set this to true if you are sure it can be matched. It's still a bit experimental.
 
 ## Supported files
 
