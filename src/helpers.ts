@@ -26,7 +26,7 @@ export class Helpers {
             }
             vscode.window.showQuickPick(options, { canPickMany: false, title: "Please select the Prefix which should be used" }).then(selectedPrefix =>
             {
-                //no check if selected because if selected empty it will be new_ which is wrong
+                if(selectedPrefix === undefined) { resolve("_new"); }
                 resolve(selectedPrefix);
             });
         });
