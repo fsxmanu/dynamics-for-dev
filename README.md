@@ -104,6 +104,11 @@ Errorhandling isn't aways giving feedback to the user. Will be corrected. If you
 
 ## Release Notes
 
+### 0.7.6 - New option to resolve filepath automatically when
+
+Added an option in the dynamicsConfig json to enable automatic path resolving if you use multiple paths
+Bugfix if you select an empty prefix it would add the "new_" prefix itself and would create a new file
+
 ### 0.7.5 - Fixed vulnerability of follow-redirect package
 
 Updated npm packages to fix vulnerability of follow-redirect package.
