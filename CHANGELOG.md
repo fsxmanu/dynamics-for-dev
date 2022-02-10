@@ -1,5 +1,10 @@
 # Change Log
 
+### 0.7.6 - Fixed vulnerability of nanoid package and uploadoptions for all file types
+
+You now can upload every file to dynamics if you want to.
+Updated npm packages to fix vulnerability of nanoid package.
+
 ### 0.7.5 - Fixed vulnerability of follow-redirect package
 
 Updated npm packages to fix vulnerability of follow-redirect package.
