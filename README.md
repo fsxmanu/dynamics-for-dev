@@ -68,7 +68,8 @@ If you do not include this option in your json the extension will get every unma
         "ApiVersion" : "9.1"
     },
     "UploadOptions" : {
-        "AddExistingToSolution" : false
+        "AddExistingToSolution" : false,
+        "TryToResolveFilePath" : false
     },
     "Solutions" : [ "MyCustomizationSolution", "MyPluginSolution" ]
 }
@@ -77,6 +78,8 @@ If you do not include this option in your json the extension will get every unma
 **UploadOptions**
 
 `AddExistingToSolution`: if you set this to true, it will ask you if you want to add the webresource to a solution even if it already exists. Otherwise it will just ask you if you create a new one. <br/>
+
+`TryToResolveFilePath`: if set to true, it will try to automatically detect the correct path option of your file you want to upload. Only set this to true if you are sure it can be matched. It's still a bit experimental.
 
 ## Supported files
 
@@ -106,10 +109,15 @@ Errorhandling isn't aways giving feedback to the user. Will be corrected. If you
 
 ## Release Notes
 
-### 0.7.6 - Fixed vulnerability of nanoid package and uploadoptions for all file types
+### 0.7.7 - Fixed vulnerability of nanoid package and uploadoptions for all file types
 
 You now can upload every file to dynamics if you want to.
 Updated npm packages to fix vulnerability of nanoid package.
+
+### 0.7.6 - New option to resolve filepath automatically when
+
+Added an option in the dynamicsConfig json to enable automatic path resolving if you use multiple paths
+Bugfix if you select an empty prefix it would add the "new_" prefix itself and would create a new file
 
 ### 0.7.5 - Fixed vulnerability of follow-redirect package
 

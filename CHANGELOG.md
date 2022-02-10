@@ -1,9 +1,14 @@
 # Change Log
 
-### 0.7.6 - Fixed vulnerability of nanoid package and uploadoptions for all file types
+### 0.7.7 - Fixed vulnerability of nanoid package and uploadoptions for all file types
 
 You now can upload every file to dynamics if you want to.
 Updated npm packages to fix vulnerability of nanoid package.
+
+### 0.7.6 - New option to resolve filepath automatically when
+
+Added an option in the dynamicsConfig json to enable automatic path resolving if you use multiple paths
+Bugfix if you select an empty prefix it would add the "new_" prefix itself and would create a new file
 
 ### 0.7.5 - Fixed vulnerability of follow-redirect package
 

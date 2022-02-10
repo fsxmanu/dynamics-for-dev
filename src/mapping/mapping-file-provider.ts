@@ -13,7 +13,8 @@ export class Mapper {
         "ApiVersion" : "9.1"
     },
     "UploadOptions" : {
-        "AddExistingToSolution" : false
+        "AddExistingToSolution" : false,
+        "TryToResolveFilePath" : false
     },
     "Solutions" : [ ]
 }`;
