@@ -96,6 +96,8 @@ If you do not include this option in your json the extension will get every unma
 * Vector format (.svg)
 * String (.resx)
 
+These are files supported by Dynamics. You can upload other file types (unknown too). But there is no guarantee that the uplaod will be successful.
+
 ## Known Issues
 
 You need to install Azure CLI in case you haven't. You need to restart after the installation.
@@ -106,6 +108,11 @@ If the wrong browser window/profile opens for you just copy the url to the corre
 Errorhandling isn't aways giving feedback to the user. Will be corrected. If you experience an error please create an issue on the github page or message the author.
 
 ## Release Notes
+
+### 0.7.7 - Fixed vulnerability of nanoid package and uploadoptions for all file types
+
+You now can upload every file to dynamics if you want to.
+Updated npm packages to fix vulnerability of nanoid package.
 
 ### 0.7.6 - New option to resolve filepath automatically when
 
