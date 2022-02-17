@@ -109,6 +109,10 @@ Errorhandling isn't aways giving feedback to the user. Will be corrected. If you
 
 ## Release Notes
 
+### 0.7.8 - Fixed vulnerability of nanoid package and uploadoptions for all file types
+
+npm package vulnerability fixed and updated.
+
 ### 0.7.7 - Fixed vulnerability of nanoid package and uploadoptions for all file types
 
 You now can upload every file to dynamics if you want to.
