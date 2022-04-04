@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.7.9 - Fixed vulnerability of nanoid package and uploadoptions for all file types
+
+npm package vulnerability fixed and updated.
+
 ### 0.7.8 - Fixed vulnerability of nanoid package and uploadoptions for all file types
 
 npm package vulnerability fixed and updated.
