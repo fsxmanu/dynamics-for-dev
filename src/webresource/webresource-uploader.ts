@@ -114,7 +114,7 @@ export class WebResourceUploader {
 		try{
             var filter = `filter=name eq '${this._prefix}${this._selectedFile}'`;
             let webResources = await this._dynamicsRequest.getWebResource(filter, "Getting Web Resources");
-            if(webResources.value.length === 0) {
+            if(webResources === undefined || webResources.value === undefined || webResources.value.length === 0) {
                 this.askToCreate();
             }
             else {
