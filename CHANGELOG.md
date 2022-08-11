@@ -1,5 +1,9 @@
 # Change Log
 
+### 0.7.11 - Added feature to auto-pick web resource type
+
+The web resource type will be automatically picked if the file extension is known
+
 ### 0.7.10 - Fixed vulnerability of package and error when retrieving webresources from dynamics
 
 Fixed an error while retrieving webresources from dynamics if results would be empty/undefined

@@ -3,7 +3,7 @@
   "displayName": "Dynamics For Dev",
   "publisher": "MSteiner",
   "description": "An extension that supports you while developing for Dynamics 365/PowerPlatform/CRM",
-  "version": "0.7.10",
+  "version": "0.7.11",
   "engines": {
     "vscode": "^1.61.0"
   },
@@ -83,7 +83,8 @@
     "watch-tests": "tsc -p -w . --outDir out",
     "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "lint": "eslint src --ext ts",
-    "test": "node ./out/test/runTest.js"
+    "test": "node ./out/test/runTest.js",
+    "vscode:packextension": "npm run vscode:prepublish & vsce package -o build/dynamics-for-dev.vsix"
   },
   "devDependencies": {
     "@types/glob": "^7.1.4",
@@ -98,6 +99,7 @@
     "mocha": "^9.1.1",
     "ts-loader": "^9.2.5",
     "typescript": "^4.4.3",
+    "vsce": "^2.10.0",
     "webpack": "^5.52.1",
     "webpack-cli": "^4.8.0"
   },
