@@ -15,9 +15,23 @@ export class WebResourceUploader {
     _rootPath: string;
     _connection: DefaultAzureCredential;
     _configFileLocation: string;
-    _fullPath : string = "";
-    _dynamicsRequest : DynamicsRequests;
+    _fullPath: string = "";
+    _dynamicsRequest: DynamicsRequests;
     _file: any = null;
+    static _webResourceTypeMappings = [
+        { extensions: ["js"], type: "JavaScript" },
+        { extensions: ["htm", "html"], type: "Html" },
+        { extensions: ["css"], type: "Css" },
+        { extensions: ["xml"], type: "XML" },
+        { extensions: ["png"], type: "PNG" },
+        { extensions: ["jpg", "jpeg"], type: "JPG" },
+        { extensions: ["gif"], type: "GIF" },
+        { extensions: ["xap"], type: "XAP" },
+        { extensions: ["xsl", "xslt"], type: "XSL" },
+        { extensions: ["ico"], type: "ICO" },
+        { extensions: ["svg"], type: "SVG" },
+        { extensions: ["resx"], type: "RESX " }
+    ];
 
     constructor(workSpaceRootPath: string) {
         this._rootPath = workSpaceRootPath;
@@ -49,15 +63,15 @@ export class WebResourceUploader {
     }
 
     async uploadWebResource() {
-		try {
+        try {
             await this.setUpRequiredVariables();
             await this.readWebResources();
             this._fullPath = this._rootPath + this._webResourceFolder;
-            this.uploadWebResources();    
+            this.uploadWebResources();
 		} catch (err){
-			vscode.window.showErrorMessage(`There was an error uploading your web resource. Make sure you have a dynamicsConfig.json file in your root workspace folder. Reason: ${err}`);
-			console.log(err);
-		}
+            vscode.window.showErrorMessage(`There was an error uploading your web resource. Make sure you have a dynamicsConfig.json file in your root workspace folder. Reason: ${err}`);
+            console.log(err);
+        }
     }
 
     async getWebResourceFolder() : Promise<string> {
@@ -85,7 +99,7 @@ export class WebResourceUploader {
             {
                 if (!selectedFolder || selectedFolder === undefined){ reject(""); return; }
                 resolve(selectedFolder);
-            });    
+            });
         });
     }
 
@@ -103,13 +117,13 @@ export class WebResourceUploader {
                     resolve();
                 }
             })
-            .then(undefined, err => {
-                console.error(err);
-                resolve();
-            });
+                .then(undefined, err => {
+                    console.error(err);
+                    resolve();
+                });
         });
     }
-    
+
     async uploadWebResources() {
 		try{
             var filter = `filter=name eq '${this._prefix}${this._selectedFile}'`;
@@ -120,45 +134,59 @@ export class WebResourceUploader {
             else {
                 this.uploadFile(false, webResources.value[0]);
             }
-		} catch (err) {
-			Notification.showError(`There was an error getting the web resources. Reason: ${err}`);
-			console.log(err);
-		}
-	}
+        } catch (err) {
+            Notification.showError(`There was an error getting the web resources. Reason: ${err}`);
+            console.log(err);
+        }
+    }
 
     async uploadFile(isNew: boolean, existingFile?: any) {
-		let fileContent: string;
+        let fileContent: string;
         let fullPath = Mapper.fixPath(this._fullPath);
 		fileContent = fs.readFileSync(`${fullPath}/${this._selectedFile}`, {encoding: 'base64'});
 		if(isNew){
-			let webResourceType = await this.chooseWebResourceType();
+            let webResourceType = await this.chooseWebResourceType();
             let match = await this._dynamicsRequest.uploadNewWebResource(webResourceType, fileContent);
             let webResourceId = await this._dynamicsRequest.publishWebResource(match);
             let solutions = await this._dynamicsRequest.getSolutions();
             this._dynamicsRequest.selectSolutionToAdd(solutions, webResourceId);
-		}
-		else {
-			this._dynamicsRequest.updateExistingWebResource(existingFile, fileContent).then(async () => {
+        }
+        else {
+            this._dynamicsRequest.updateExistingWebResource(existingFile, fileContent).then(async () => {
                 if(this._data.UploadOptions.AddExistingToSolution === true){
                     await this.askToAddToSolution(existingFile);
                 }
                 await this._dynamicsRequest.publishWebResource(existingFile.webresourceid);
             });
-		}
-	}
+        }
+    }
 
     chooseWebResourceType() {
         return new Promise<string>((resolve, reject) => {
-            let webResourceTypes = [ "JavaScript", "Html", "Css", "XML", "PNG", "JPG", "GIF", "XAP", "XSL", "ICO", "SVG", "RESX" ];
-            vscode.window.showQuickPick(webResourceTypes, {canPickMany: false, title: "Please choose the webresource type"}).then(selected => {
-                if(!selected){ return; }
+            const autoPickedType = this.autoPickWebResourceType();
+
+            if (!!autoPickedType) {
+                resolve(autoPickedType);
+                return;
+            }
+
+            let webResourceTypes = ["JavaScript", "Html", "Css", "XML", "PNG", "JPG", "GIF", "XAP", "XSL", "ICO", "SVG", "RESX"];
+            vscode.window.showQuickPick(webResourceTypes, { canPickMany: false, title: "Please choose the webresource type" }).then(selected => {
+                if (!selected) { return; }
                 resolve(selected);
             })
-            .then(undefined, err => {
-                vscode.window.showErrorMessage("Couldn't choose the webresource type'");
-                console.error(err); 
-            });
+                .then(undefined, err => {
+                    vscode.window.showErrorMessage("Couldn't choose the webresource type'");
+                    console.error(err);
+                });
         });
+    }
+
+    autoPickWebResourceType() {
+        const fileExtension = this._selectedFile.substring(this._selectedFile?.lastIndexOf(".") + 1)?.toLowerCase();
+        const mapping = WebResourceUploader._webResourceTypeMappings.find(m => m.extensions.includes(fileExtension));
+
+        return mapping?.type;
     }
 
     askToCreate() {
@@ -168,17 +196,17 @@ export class WebResourceUploader {
                 this.uploadFile(true);
             }
         })
-        .then(undefined, err => { 
-            vscode.window.showErrorMessage(`There was an error createing the web resource. Reason: ${err}`);
-            console.error(err);
-        });
+            .then(undefined, err => {
+                vscode.window.showErrorMessage(`There was an error createing the web resource. Reason: ${err}`);
+                console.error(err);
+            });
     }
 
     async askToAddToSolution(existingFile: any) {
         return new Promise<void>(async (resolve, reject) => {
             let decision = await Notification.showPick(["Yes", "No"], "Do you want to add the WebResource to a Solution?");
             if(decision === null) { Notification.showError("There was an error while deciding if component should be added to solution."); }
-            
+
             if (decision === "Yes") {
                 let solutions = await this._dynamicsRequest.getSolutions();
                 this._dynamicsRequest.selectSolutionToAdd(solutions, existingFile.webresourceid);
